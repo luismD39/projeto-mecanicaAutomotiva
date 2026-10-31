@@ -10,6 +10,16 @@
 </div>
 {%- endmacro %}
 
+{# Cartão de um sensor. O JS (AutoScan.renderTile) preenche valor, status e observação. #}
+{% macro kpi_tile(key, label, unit) -%}
+<div class="kpi" data-sensor="{{ key }}" data-status="loading">
+  <p class="kpi-label">{{ label }}</p>
+  <p class="kpi-value"><span class="kpi-number">—</span> <span class="kpi-unit">{{ unit }}</span></p>
+  <div class="kpi-status"><span class="muted">Aguardando leitura...</span></div>
+  <p class="kpi-note"></p>
+</div>
+{%- endmacro %}
+
 {% macro badge(kind, text) -%}
 {% set icons = {"ok": "check", "warn": "alert", "crit": "error", "info": "info"} %}
 <span class="badge badge--{{ kind }}">{{ icon(icons[kind]) }}<span class="badge-text">{{ text }}</span></span>

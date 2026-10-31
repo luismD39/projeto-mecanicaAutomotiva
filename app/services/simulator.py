@@ -41,7 +41,7 @@ PARAMS = {
     "voltage_low_v": 11.6,
     "ltft_normal_pct": 1.5,
     "ltft_lean_pct": 16,
-    "stft_lean_pct": 12,
+    "stft_lean_pct": 14,
 }
 
 # chave: (nome exibido, unidade)

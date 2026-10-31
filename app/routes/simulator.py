@@ -2,6 +2,7 @@
 
 from flask import Blueprint, current_app, jsonify, request
 
+from app.services import sensor_status
 from app.services.errors import ValidationError
 
 bp = Blueprint("simulator", __name__, url_prefix="/api")
@@ -13,7 +14,7 @@ def _ecu():
 
 @bp.get("/sensors/live")
 def live():
-    return jsonify(_ecu().snapshot())
+    return jsonify(sensor_status.annotate(_ecu().snapshot()))
 
 
 @bp.post("/simulator/mode")

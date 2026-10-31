@@ -6,10 +6,51 @@
     Todas as leituras e falhas são geradas pelo simulador interno.</p>
 </div>
 
-<div class="grid">
-  <section class="card" aria-labelledby="titulo-status">
-    <h2 id="titulo-status">Status do sistema</h2>
-    <div id="system-status" aria-live="polite"></div>
+<p class="live-source"><span class="live-dot" aria-hidden="true"></span>
+  Origem: ECU simulada · atualização a cada 1 segundo · <span id="last-update">aguardando primeira leitura</span></p>
+
+<section class="kpi-grid" aria-label="Indicadores principais">
+  {% for key, label in dashboard_sensors %}
+    {{ kpi_tile(key, label, sensors[key][1]) }}
+  {% endfor %}
+</section>
+<p class="hint thresholds-note">{{ thresholds_notice }}</p>
+
+<div class="grid grid--2">
+  <section class="card" aria-labelledby="chart-rpm-title">
+    <h2 id="chart-rpm-title">Rotação do motor (RPM)</h2>
+    <p class="hint">Último minuto</p>
+    <div class="chart-box">
+      <canvas id="chart-rpm" role="img" aria-label="Gráfico da rotação do motor no último minuto. Os valores atuais estão nos indicadores acima."></canvas>
+    </div>
+  </section>
+  <section class="card" aria-labelledby="chart-ect-title">
+    <h2 id="chart-ect-title">Temperatura do líquido de arrefecimento (ECT)</h2>
+    <p class="hint">Último minuto</p>
+    <div class="chart-box">
+      <canvas id="chart-ect" role="img" aria-label="Gráfico da temperatura do motor no último minuto. Os valores atuais estão nos indicadores acima."></canvas>
+    </div>
+  </section>
+</div>
+
+<div class="grid grid--2">
+  <section class="card" aria-labelledby="titulo-alertas">
+    <h2 id="titulo-alertas">Alertas</h2>
+    <div id="alerts" aria-live="polite"></div>
+    <div class="form-actions quick-links">
+      <a class="btn btn--primary" href="{{ url_for('pages.scanner') }}">{{ icon("scan") }}Abrir Scanner</a>
+      <a class="btn btn--secondary" href="{{ url_for('pages.laboratorio') }}">{{ icon("flask") }}Laboratório de falhas</a>
+    </div>
+  </section>
+
+  <section class="card" aria-labelledby="titulo-ecu">
+    <h2 id="titulo-ecu">ECU simulada</h2>
+    <dl class="data-list" id="ecu-status">
+      <div><dt>Conexão</dt><dd id="ecu-connection"><span class="muted">Verificando...</span></dd></div>
+      <div><dt>Modo de condução</dt><dd id="ecu-mode">—</dd></div>
+      <div><dt>Cenários de falha ativos</dt><dd id="ecu-scenarios">—</dd></div>
+      <div><dt>Ventoinha</dt><dd id="ecu-fan">—</dd></div>
+    </dl>
   </section>
 
   <section class="card" aria-labelledby="titulo-veiculo">
@@ -27,9 +68,31 @@
                "Ir para Veículos", url_for("pages.veiculos")) }}
     {% endif %}
   </section>
+
+  <section class="card" aria-labelledby="titulo-diagnostico">
+    <h2 id="titulo-diagnostico">Último diagnóstico</h2>
+    {% if last_diagnostic %}
+      <dl class="data-list">
+        <div><dt>Data</dt><dd>{{ last_diagnostic.completed_at | datetime_br }}</dd></div>
+        <div><dt>Códigos de falha (DTC)</dt><dd>{{ last_diagnostic.dtc_count }}</dd></div>
+        <div><dt>Resumo</dt><dd>{{ last_diagnostic.summary }}</dd></div>
+      </dl>
+      <div class="form-actions quick-links">
+        <a class="btn btn--secondary" href="{{ url_for('pages.diagnosticos') }}">Ver diagnóstico</a>
+      </div>
+    {% elif active_vehicle %}
+      {{ state("empty", "Nenhuma varredura realizada",
+               "Execute uma varredura simulada para ver os códigos e o resumo aqui.",
+               "Ir para o Scanner", url_for("pages.scanner")) }}
+    {% else %}
+      {{ state("empty", "Sem diagnóstico", "Selecione um veículo ativo primeiro.") }}
+    {% endif %}
+  </section>
 </div>
 {% endblock %}
 
 {% block scripts %}
+<script src="{{ url_for('static', filename='vendor/chart.umd.min.js') }}"></script>
+<script src="{{ url_for('static', filename='js/charts.js') }}"></script>
 <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
 {% endblock %}

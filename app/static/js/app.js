@@ -93,6 +93,78 @@ const AutoScan = (() => {
       : "Nenhum veículo ativo";
   }
 
+  // Executa `task` a cada `intervalMs`, sem sobrepor pedidos: o próximo só é agendado
+  // depois que o anterior termina. Pausa com a aba escondida e para ao sair da página.
+  function poll(task, intervalMs = 1000) {
+    let timer = null;
+    let running = false;
+    let stopped = false;
+
+    async function tick() {
+      timer = null;
+      if (stopped || document.hidden || running) return;
+      running = true;
+      try {
+        await task();
+      } finally {
+        running = false;
+      }
+      if (!stopped && !document.hidden) timer = setTimeout(tick, intervalMs);
+    }
+
+    function runNow() {
+      clearTimeout(timer);
+      tick();
+    }
+
+    document.addEventListener("visibilitychange", () => {
+      if (document.hidden) {
+        clearTimeout(timer);
+        timer = null;
+      } else if (!running && timer === null) {
+        tick();
+      }
+    });
+    const stop = () => {
+      stopped = true;
+      clearTimeout(timer);
+    };
+    window.addEventListener("pagehide", stop);
+
+    tick();
+    return { runNow, stop };
+  }
+
+  // ---------- Leituras de sensores ----------
+
+  const DECIMALS = { rpm: 0, "km/h": 0, V: 2 };
+  const STATUS_BADGE = { normal: "ok", warn: "warn", crit: "crit", invalid: "warn" };
+
+  function formatNumber(value, decimals = 1) {
+    return value.toLocaleString("pt-BR", { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+  }
+
+  function formatReading(reading) {
+    if (reading.value === null) return "—";
+    return formatNumber(reading.value, DECIMALS[reading.unit] ?? 1);
+  }
+
+  function statusBadge(status, label) {
+    return badge(STATUS_BADGE[status] || "info", label);
+  }
+
+  // Preenche um cartão .kpi (ver _components.html: kpi_tile) com uma leitura.
+  function renderTile(tile, reading) {
+    tile.dataset.status = reading.status;
+    tile.querySelector(".kpi-number").textContent = formatReading(reading);
+    tile.querySelector(".kpi-status").replaceChildren(statusBadge(reading.status, reading.status_label));
+    tile.querySelector(".kpi-note").textContent = reading.status_note || "";
+  }
+
+  function timeLabel(isoTimestamp) {
+    return new Date(isoTimestamp).toLocaleTimeString("pt-BR");
+  }
+
   // Menu lateral em telas pequenas.
   function setupMenu() {
     const toggle = document.querySelector(".menu-toggle");
@@ -122,5 +194,8 @@ const AutoScan = (() => {
 
   document.addEventListener("DOMContentLoaded", setupMenu);
 
-  return { api, ApiError, showState, badge, notify, setActiveVehicleName };
+  return {
+    api, ApiError, showState, badge, notify, setActiveVehicleName,
+    poll, formatNumber, formatReading, statusBadge, renderTile, timeLabel,
+  };
 })();

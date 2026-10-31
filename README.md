@@ -11,8 +11,9 @@ Simulador didático de diagnóstico automotivo, feito como projeto acadêmico pa
 | 1. Fundação (Flask, SQLite, `/api/health`) | Concluída |
 | 2. Layout, tema escuro e navegação | Concluída |
 | 3. Cadastro de veículos e veículo ativo | Concluída |
-| 4. Simulador de ECU (API) | Concluída. As telas que o usam chegam nas Fases 5 e 8 |
-| 5 a 10 | Pendentes (ver `DEVELOPMENT_PLAN.md`) |
+| 4. Simulador de ECU (API) | Concluída |
+| 5. Dashboard e Dados em tempo real | Concluída |
+| 6 a 10 | Pendentes (ver `DEVELOPMENT_PLAN.md`) |
 
 As telas que ainda não foram implementadas abrem normalmente e informam em qual fase ganham funções. Elas não exibem botões sem ação.
 
@@ -88,12 +89,39 @@ O simulador (`app/services/simulator.py`) mantém um estado que evolui com o tem
 | Tensão baixa (`low_voltage`) | Tensão cai para ~11,6 V | nenhum (condição observada) |
 | Sensor ECT desconectado (`ect_disconnected`) | Temperatura `null`/inválida; ECU liga a ventoinha por segurança | P0115 |
 | Falha de combustão cil. 1 (`misfire_cyl1`) | Rotação oscila mais na marcha lenta | P0301 |
-| Mistura pobre (`lean_mixture`) | Correções de combustível positivas (~+12% e ~+16%) | P0171 |
+| Mistura pobre (`lean_mixture`) | Correções de combustível positivas (~+14% e ~+16%) | P0171 |
 | Falha de velocidade (`vss_failure`) | Velocidade informada fica em 0 km/h mesmo em movimento | P0500 |
 
 "Superaquecimento" e "Sensor ECT desconectado" não podem ficar ativos juntos: sem o sensor, o superaquecimento não poderia ser observado.
 
-O estado do simulador fica na memória: ao reiniciar o servidor, ele volta ao normal. Os cadastros (banco) não são afetados.
+O estado do simulador fica na memória: ao reiniciar o servidor, ele volta ao normal. Os cadastros (banco) não são afetados. Há **um simulador por servidor**: todas as abas e telas abertas veem o mesmo estado.
+
+### Limites de normal / atenção / crítico
+
+O Dashboard e a tela Dados em tempo real classificam cada leitura com selo (ícone + texto) e cor. Os limites são **didáticos/ilustrativos** e ficam em `app/services/sensor_status.py`:
+
+| Sensor | Atenção | Crítico |
+|---|---|---|
+| Temperatura (ECT) | ≥ 105 °C | ≥ 115 °C |
+| Tensão do módulo | ≤ 13,0 V ou ≥ 14,8 V | ≤ 12,0 V ou ≥ 15,5 V |
+| Rotação | ≥ 5500 rpm | ≥ 6500 rpm |
+| Correções de combustível (curto e longo prazo) | ≤ −10% ou ≥ +10% | ≤ −20% ou ≥ +20% |
+
+Sensor sem leitura (ex.: ECT desconectado) aparece como **"Sem leitura"**. Velocidade, carga, borboleta e MAF não têm limite.
+
+### Telas
+
+- **Dashboard**:
+  - indicadores principais e gráficos de rotação e temperatura do último minuto;
+  - alertas, estado da ECU simulada, veículo ativo e último diagnóstico.
+- **Dados em tempo real**:
+  - todos os sensores;
+  - botões de modo de condução (marcha lenta, aceleração, desaceleração);
+  - gráfico do parâmetro escolhido.
+
+As duas telas consultam `/api/sensors/live` a cada 1 segundo, sem recarregar a página. O próximo pedido só sai depois que o anterior termina, nunca há dois ao mesmo tempo, e a atualização pausa quando a aba fica em segundo plano.
+
+O Chart.js 4.4.1 (licença MIT) está em `app/static/vendor/`, dentro do projeto, para funcionar sem internet.
 
 ## Erros
 
@@ -124,6 +152,7 @@ app/
   services/       regras de negócio
   templates/      HTML (Jinja); base.html tem a sidebar e o cabeçalho
   static/         CSS, JavaScript e imagens (tudo local, funciona sem internet)
+  static/vendor/  bibliotecas de terceiros (Chart.js)
 tests/            testes pytest
 run.py            inicia o servidor local
 ```

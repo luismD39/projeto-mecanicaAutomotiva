@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block content %}
+<p class="live-source"><span class="live-dot" aria-hidden="true"></span>
+  Origem: ECU simulada (não é leitura de veículo real) · atualização a cada 1 segundo ·
+  <span id="last-update">aguardando primeira leitura</span></p>
+
+<section class="card controls" aria-labelledby="titulo-modo">
+  <div>
+    <h2 id="titulo-modo">Modo de condução</h2>
+    <p class="hint">Muda o comportamento da ECU simulada. Para provocar falhas, use o
+      <a href="{{ url_for('pages.laboratorio') }}">Laboratório de falhas</a>.</p>
+  </div>
+  <div class="segmented" role="group" aria-label="Modo de condução">
+    {% for value, label in modes.items() %}
+    <button type="button" class="segmented-btn" data-mode="{{ value }}" aria-pressed="false">{{ label }}</button>
+    {% endfor %}
+  </div>
+  <p class="controls-status">Cenários de falha ativos: <strong id="active-scenarios">—</strong>
+    · Ventoinha: <strong id="fan-state">—</strong></p>
+</section>
+
+<section class="kpi-grid kpi-grid--3" aria-label="Leituras dos sensores">
+  {% for key, (label, unit) in sensors.items() %}
+    {{ kpi_tile(key, label, unit) }}
+  {% endfor %}
+</section>
+<p class="hint thresholds-note">{{ thresholds_notice }}</p>
+
+<section class="card" aria-labelledby="titulo-grafico">
+  <div class="card-header">
+    <div>
+      <h2 id="titulo-grafico">Gráfico do último minuto</h2>
+      <p class="hint">Escolha o parâmetro. O histórico de todos os sensores é guardado enquanto esta tela estiver aberta.</p>
+    </div>
+    <div class="field">
+      <label for="chart-sensor">Parâmetro</label>
+      <select id="chart-sensor">
+        {% for key, (label, unit) in sensors.items() %}
+        <option value="{{ key }}" data-unit="{{ unit }}">{{ label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+  </div>
+  <div class="chart-box chart-box--tall">
+    <canvas id="live-chart" role="img" aria-label="Gráfico do parâmetro escolhido no último minuto. Os valores atuais estão nos cartões acima."></canvas>
+  </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='vendor/chart.umd.min.js') }}"></script>
+<script src="{{ url_for('static', filename='js/charts.js') }}"></script>
+<script src="{{ url_for('static', filename='js/live.js') }}"></script>
+{% endblock %}

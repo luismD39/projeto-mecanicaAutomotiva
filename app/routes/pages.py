@@ -2,11 +2,12 @@
 
 import logging
 import sqlite3
+from datetime import datetime
 
 from flask import Blueprint, render_template
 
 from app.db import get_db
-from app.services import vehicles
+from app.services import diagnostics, sensor_status, simulator, vehicles
 
 logger = logging.getLogger(__name__)
 
@@ -24,7 +25,8 @@ PAGES = [
     {"endpoint": "scanner", "path": "/scanner", "title": "Scanner", "icon": "scan", "phase": 6,
      "summary": "Execute uma varredura OBD-II simulada no veículo ativo."},
     {"endpoint": "dados", "path": "/dados-em-tempo-real", "title": "Dados em tempo real", "icon": "activity",
-     "phase": 5, "summary": "Acompanhe os parâmetros simulados do motor em cartões e gráficos."},
+     "phase": 5, "template": "live.html",
+     "summary": "Acompanhe os parâmetros simulados do motor em cartões e gráficos."},
     {"endpoint": "diagnosticos", "path": "/diagnosticos", "title": "Diagnósticos", "icon": "clipboard", "phase": 7,
      "summary": "Detalhe do diagnóstico mais recente: DTCs, evidências, hipóteses e recomendações."},
     {"endpoint": "laboratorio", "path": "/laboratorio", "title": "Laboratório de falhas", "icon": "flask",
@@ -36,11 +38,31 @@ PAGES = [
 ]
 
 
+# Sensores exibidos em destaque no Dashboard, com rótulo curto.
+DASHBOARD_SENSORS = [
+    ("rpm", "Rotação (RPM)"),
+    ("coolant_temperature", "Temperatura (ECT)"),
+    ("vehicle_speed", "Velocidade (VSS)"),
+    ("engine_load", "Carga do motor"),
+    ("throttle_position", "Borboleta (TPS)"),
+    ("battery_voltage", "Tensão do módulo"),
+]
+
+
 def _extra_context(endpoint: str) -> dict:
     if endpoint == "veiculos":
         return {"fuel_types": vehicles.FUEL_TYPES, "year_min": vehicles.YEAR_MIN,
                 "year_max": vehicles.year_max(), "mileage_max": vehicles.MILEAGE_MAX_KM,
                 "text_limits": vehicles.TEXT_LIMITS}
+    if endpoint == "dashboard":
+        db = get_db()
+        active = vehicles.get_active_vehicle(db)
+        return {"sensors": simulator.SENSORS, "dashboard_sensors": DASHBOARD_SENSORS,
+                "last_diagnostic": diagnostics.get_latest(db, active["id"]) if active else None,
+                "thresholds_notice": sensor_status.NOTICE}
+    if endpoint == "dados":
+        return {"sensors": simulator.SENSORS, "modes": simulator.MODES,
+                "thresholds_notice": sensor_status.NOTICE}
     return {}
 
 
@@ -55,6 +77,15 @@ def _make_view(page: dict):
 
 for _page in PAGES:
     bp.add_url_rule(_page["path"], _page["endpoint"], _make_view(_page))
+
+
+@bp.app_template_filter("datetime_br")
+def datetime_br(iso: str) -> str:
+    """'2026-10-31T21:04:05+00:00' -> '31/10/2026 18:04' (horário local do computador)."""
+    try:
+        return datetime.fromisoformat(iso).astimezone().strftime("%d/%m/%Y %H:%M")
+    except (TypeError, ValueError):
+        return iso
 
 
 @bp.app_context_processor
