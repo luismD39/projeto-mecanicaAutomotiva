@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% macro field_error(name) -%}
+<p class="field-error" id="f-{{ name }}-error" hidden></p>
+{%- endmacro %}
+
+{% block content %}
+<div class="split">
+  <section class="card" aria-labelledby="form-title">
+    <h2 id="form-title">Cadastrar veículo</h2>
+    <p class="hint">Use apenas dados fictícios de demonstração. Campos com * são obrigatórios.</p>
+
+    <form id="vehicle-form" class="form" novalidate>
+      <div class="field">
+        <label for="f-make">Fabricante/marca *</label>
+        <input id="f-make" name="make" type="text" maxlength="{{ text_limits.make }}" required
+               autocomplete="off" aria-describedby="f-make-error">
+        {{ field_error("make") }}
+      </div>
+
+      <div class="field">
+        <label for="f-model">Modelo *</label>
+        <input id="f-model" name="model" type="text" maxlength="{{ text_limits.model }}" required
+               autocomplete="off" aria-describedby="f-model-error">
+        {{ field_error("model") }}
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label for="f-year">Ano *</label>
+          <input id="f-year" name="year" type="number" inputmode="numeric" step="1"
+                 min="{{ year_min }}" max="{{ year_max }}" required aria-describedby="f-year-hint f-year-error">
+          <p class="field-hint" id="f-year-hint">De {{ year_min }} a {{ year_max }}</p>
+          {{ field_error("year") }}
+        </div>
+
+        <div class="field">
+          <label for="f-mileage_km">Quilometragem (km)</label>
+          <input id="f-mileage_km" name="mileage_km" type="number" inputmode="numeric" step="1"
+                 min="0" max="{{ mileage_max }}" value="0" aria-describedby="f-mileage_km-error">
+          {{ field_error("mileage_km") }}
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="f-engine">Motorização</label>
+        <input id="f-engine" name="engine" type="text" maxlength="{{ text_limits.engine }}"
+               placeholder="Ex.: 1.6 16V" autocomplete="off" aria-describedby="f-engine-error">
+        {{ field_error("engine") }}
+      </div>
+
+      <div class="field">
+        <label for="f-fuel_type">Combustível *</label>
+        <select id="f-fuel_type" name="fuel_type" required aria-describedby="f-fuel_type-error">
+          <option value="">Selecione...</option>
+          {% for value, label in fuel_types.items() %}
+          <option value="{{ value }}">{{ label }}</option>
+          {% endfor %}
+        </select>
+        {{ field_error("fuel_type") }}
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn btn--primary" id="submit-btn">Cadastrar veículo</button>
+        <button type="button" class="btn btn--secondary" id="cancel-edit" hidden>Cancelar edição</button>
+      </div>
+    </form>
+  </section>
+
+  <section class="card" aria-labelledby="list-title">
+    <h2 id="list-title">Veículos cadastrados</h2>
+    <p class="hint">O veículo ativo é o usado pelo scanner e pelo dashboard. Veículos com diagnósticos no histórico não podem ser excluídos.</p>
+    <div id="vehicle-list" aria-live="polite"></div>
+  </section>
+</div>
+
+<dialog id="delete-dialog" class="dialog" aria-labelledby="delete-title" aria-describedby="delete-text">
+  <h2 id="delete-title">Excluir veículo?</h2>
+  <p id="delete-text"></p>
+  <div class="form-actions">
+    <button type="button" class="btn btn--secondary" id="delete-cancel">Cancelar</button>
+    <button type="button" class="btn btn--danger" id="delete-confirm">Excluir veículo</button>
+  </div>
+</dialog>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/vehicles.js') }}"></script>
+{% endblock %}

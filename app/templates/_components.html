@@ -1,0 +1,16 @@
+{# Componentes reutilizáveis. O JS (static/js/app.js) clona estes mesmos blocos para manter um só visual. #}
+
+{% macro state(kind, message, detail=None, action_label=None, action_href=None) -%}
+{% set icons = {"loading": "loading", "empty": "empty", "error": "error"} %}
+<div class="state state--{{ kind }}" role="{{ 'alert' if kind == 'error' else 'status' }}">
+  {{ icon(icons[kind], "spin" if kind == "loading" else "") }}
+  <p class="state-message">{{ message }}</p>
+  <p class="state-detail"{% if not detail %} hidden{% endif %}>{{ detail or "" }}</p>
+  {% if action_href %}<a class="btn btn--secondary" href="{{ action_href }}">{{ action_label }}</a>{% endif %}
+</div>
+{%- endmacro %}
+
+{% macro badge(kind, text) -%}
+{% set icons = {"ok": "check", "warn": "alert", "crit": "error", "info": "info"} %}
+<span class="badge badge--{{ kind }}">{{ icon(icons[kind]) }}<span class="badge-text">{{ text }}</span></span>
+{%- endmacro %}

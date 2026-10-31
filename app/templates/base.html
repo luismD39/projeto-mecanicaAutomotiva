@@ -1,0 +1,81 @@
+{% from "_components.html" import state, badge %}
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ page.title }} | AutoScan Pro</title>
+  <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='img/logo.svg') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
+</head>
+<body>
+  <a class="skip-link" href="#conteudo">Pular para o conteúdo</a>
+
+  <div class="layout">
+    <aside class="sidebar" id="sidebar">
+      <a class="brand" href="{{ url_for('pages.dashboard') }}">
+        <img src="{{ url_for('static', filename='img/logo.svg') }}" alt="" width="32" height="32">
+        <span>AutoScan <strong>Pro</strong></span>
+      </a>
+      <nav aria-label="Navegação principal">
+        <ul class="nav">
+          {% for p in pages %}
+          {% set current = p.endpoint == page.endpoint %}
+          <li>
+            <a class="nav-link{% if current %} is-active{% endif %}" href="{{ url_for('pages.' ~ p.endpoint) }}"
+               {%- if current %} aria-current="page"{% endif %}>
+              {{ icon(p.icon) }}<span>{{ p.title }}</span>
+            </a>
+          </li>
+          {% endfor %}
+        </ul>
+      </nav>
+      <p class="sidebar-note">{{ icon("info") }}Versão 1.0 · todos os dados são simulados</p>
+    </aside>
+
+    <div class="main">
+      <header class="topbar">
+        <button class="menu-toggle btn btn--ghost" type="button" aria-controls="sidebar" aria-expanded="false">
+          {{ icon("menu") }}<span class="sr-only">Abrir menu de navegação</span>
+        </button>
+
+        <div class="topbar-vehicle">
+          {{ icon("car") }}
+          <span><span class="label">Veículo ativo</span>
+            <strong id="topbar-vehicle-name">
+              {%- if active_vehicle %}{{ active_vehicle.make }} {{ active_vehicle.model }} {{ active_vehicle.year }}
+              {%- else %}Nenhum veículo ativo{% endif -%}
+            </strong></span>
+        </div>
+
+        <div class="topbar-ecu">
+          <span class="badge badge--info">{{ icon("cpu") }}ECU simulada</span>
+          <span class="topbar-ecu-note">Sem conexão com veículo real</span>
+        </div>
+      </header>
+
+      <main id="conteudo" tabindex="-1">
+        <div class="page-header">
+          <h1>{{ page.title }}</h1>
+          {% if page.summary %}<p>{{ page.summary }}</p>{% endif %}
+        </div>
+        {% block content %}{% endblock %}
+      </main>
+    </div>
+  </div>
+
+  {# Mensagens rápidas de confirmação/erro (AutoScan.notify). #}
+  <div class="toast-region" id="toast-region" role="status" aria-live="polite"></div>
+
+  {# Modelos usados pelo JS (AutoScan.showState / AutoScan.badge), para o visual ser igual ao do servidor. #}
+  <template id="tpl-state-loading">{{ state("loading", "Carregando...") }}</template>
+  <template id="tpl-state-empty">{{ state("empty", "Nada para mostrar.") }}</template>
+  <template id="tpl-state-error">{{ state("error", "Ocorreu um erro.") }}</template>
+  {% for kind in ["ok", "warn", "crit", "info"] %}
+  <template id="tpl-badge-{{ kind }}">{{ badge(kind, "") }}</template>
+  {% endfor %}
+
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

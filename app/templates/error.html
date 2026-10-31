@@ -1,0 +1,6 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="card">
+  {{ state("error", message, "Código do erro: " ~ status, "Voltar ao Dashboard", url_for("pages.dashboard")) }}
+</section>
+{% endblock %}

@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="notice" role="note">
+  {{ icon("info") }}
+  <p><strong>Simulação didática.</strong> O AutoScan Pro não se conecta a veículos, ECU ou adaptadores OBD-II.
+    Todas as leituras e falhas são geradas pelo simulador interno.</p>
+</div>
+
+<div class="grid">
+  <section class="card" aria-labelledby="titulo-status">
+    <h2 id="titulo-status">Status do sistema</h2>
+    <div id="system-status" aria-live="polite"></div>
+  </section>
+
+  <section class="card" aria-labelledby="titulo-veiculo">
+    <h2 id="titulo-veiculo">Veículo ativo</h2>
+    {% if active_vehicle %}
+      <dl class="data-list">
+        <div><dt>Veículo</dt><dd>{{ active_vehicle.make }} {{ active_vehicle.model }}</dd></div>
+        <div><dt>Ano</dt><dd>{{ active_vehicle.year }}</dd></div>
+        <div><dt>Motor</dt><dd>{{ active_vehicle.engine or "Não informado" }}</dd></div>
+        <div><dt>Quilometragem</dt><dd>{{ "{:,.0f}".format(active_vehicle.mileage_km).replace(",", ".") }} km</dd></div>
+      </dl>
+    {% else %}
+      {{ state("empty", "Nenhum veículo ativo",
+               "Cadastre e selecione um veículo fictício para usar o scanner.",
+               "Ir para Veículos", url_for("pages.veiculos")) }}
+    {% endif %}
+  </section>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endblock %}
