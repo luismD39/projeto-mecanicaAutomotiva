@@ -35,8 +35,8 @@ Exemplo de criação:
 ## ECU simulada e sensores
 - `GET /api/sensors/live`: snapshot atual.
 - `POST /api/simulator/mode`: define modo `idle`, `accelerating` ou `decelerating`.
-- `GET /api/simulator/scenarios`: lista cenários ativos.
-- `POST /api/simulator/scenarios/<scenario_id>/activate`: ativa cenário.
+- `GET /api/simulator/scenarios`: lista todos os cenários, indicando quais estão ativos e com quais conflitam, além do modo atual.
+- `POST /api/simulator/scenarios/<scenario_id>/activate`: ativa cenário. Retorna 409 (`SCENARIO_CONFLICT`) se contradizer um cenário ativo.
 - `POST /api/simulator/scenarios/<scenario_id>/deactivate`: desativa cenário.
 - `POST /api/simulator/reset`: restaura estado normal.
 
@@ -57,6 +57,8 @@ Exemplo de snapshot:
 }
 ```
 Valores acima são ilustrativos.
+
+Implementação (Fase 4): cada sensor também traz `label` (nome em português). Além dos seis acima, o snapshot inclui `maf`, `short_term_fuel_trim` e `long_term_fuel_trim`. Há ainda os campos `mode`, `mode_label`, `active_scenarios`, `dtcs` (códigos gerados pelos cenários ativos) e `notice` (aviso de dados simulados). Um sensor sem leitura vem com `"value": null` e `"validity": "invalid"`.
 
 ## Scanner e diagnósticos
 - `POST /api/scanner/start`: inicia uma varredura para o veículo ativo.

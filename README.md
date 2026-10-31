@@ -11,7 +11,8 @@ Simulador didático de diagnóstico automotivo, feito como projeto acadêmico pa
 | 1. Fundação (Flask, SQLite, `/api/health`) | Concluída |
 | 2. Layout, tema escuro e navegação | Concluída |
 | 3. Cadastro de veículos e veículo ativo | Concluída |
-| 4 a 10 | Pendentes (ver `DEVELOPMENT_PLAN.md`) |
+| 4. Simulador de ECU (API) | Concluída. As telas que o usam chegam nas Fases 5 e 8 |
+| 5 a 10 | Pendentes (ver `DEVELOPMENT_PLAN.md`) |
 
 As telas que ainda não foram implementadas abrem normalmente e informam em qual fase ganham funções. Elas não exibem botões sem ação.
 
@@ -68,6 +69,34 @@ O banco SQLite é criado automaticamente em `instance/autoscan.db` na primeira e
 | DELETE | `/api/vehicles/<id>` | Exclui (204), ou 409 se houver histórico |
 | POST | `/api/vehicles/<id>/activate` | Define como veículo ativo |
 
+## ECU simulada
+
+O simulador (`app/services/simulator.py`) mantém um estado que evolui com o tempo: velocidade, borboleta, temperatura, tensão e correção de combustível. As leituras são calculadas a partir desse estado, então ficam coerentes entre si. Por exemplo, a rotação acompanha a velocidade e a marcha, e a carga cai na desaceleração (corte de combustível). **Todos os parâmetros são didáticos/ilustrativos**, não especificações de um veículo real, e ficam no dicionário `PARAMS`.
+
+| Método | Endereço | Ação |
+|---|---|---|
+| GET | `/api/sensors/live` | Leitura atual de todos os sensores |
+| POST | `/api/simulator/mode` | `{"mode": "idle" \| "accelerating" \| "decelerating"}` |
+| GET | `/api/simulator/scenarios` | Modo atual e cenários (ativos ou não) |
+| POST | `/api/simulator/scenarios/<id>/activate` | Ativa um cenário (409 se contradizer outro) |
+| POST | `/api/simulator/scenarios/<id>/deactivate` | Desativa um cenário |
+| POST | `/api/simulator/reset` | Volta ao normal: parado, sem cenários |
+
+| Cenário (`id`) | O que acontece | DTC gerado |
+|---|---|---|
+| Superaquecimento (`overheating`) | Ventoinha não liga; temperatura sobe ~1 °C/s até ~125 °C | nenhum (condição observada) |
+| Tensão baixa (`low_voltage`) | Tensão cai para ~11,6 V | nenhum (condição observada) |
+| Sensor ECT desconectado (`ect_disconnected`) | Temperatura `null`/inválida; ECU liga a ventoinha por segurança | P0115 |
+| Falha de combustão cil. 1 (`misfire_cyl1`) | Rotação oscila mais na marcha lenta | P0301 |
+| Mistura pobre (`lean_mixture`) | Correções de combustível positivas (~+12% e ~+16%) | P0171 |
+| Falha de velocidade (`vss_failure`) | Velocidade informada fica em 0 km/h mesmo em movimento | P0500 |
+
+"Superaquecimento" e "Sensor ECT desconectado" não podem ficar ativos juntos: sem o sensor, o superaquecimento não poderia ser observado.
+
+O estado do simulador fica na memória: ao reiniciar o servidor, ele volta ao normal. Os cadastros (banco) não são afetados.
+
+## Erros
+
 Erros de validação retornam 422 com uma mensagem por campo:
 
 ```json
@@ -119,6 +148,9 @@ run.py            inicia o servidor local
 - Limites didáticos do cadastro: ano de 1996 (início da obrigatoriedade do OBD-II nos EUA) até o ano seguinte ao atual; quilometragem de 0 a 2.000.000 km; fabricante e modelo com até 60 caracteres. Ficam em `app/services/vehicles.py`.
 - O primeiro veículo cadastrado vira o ativo automaticamente. Os seguintes precisam ser ativados com o botão "Ativar".
 - Política de exclusão: um veículo com diagnósticos no histórico **não pode ser excluído** (resposta 409, com explicação). O histórico é preservado.
+- O "modo falha ativada" da especificação é representado pelos cenários de falha, que podem ser combinados com qualquer modo de condução.
+- Cenários como superaquecimento e tensão baixa **não geram DTC**: eles servem para mostrar a diferença entre condição observada e código de falha armazenado.
+- O simulador avança no tempo a cada consulta. Nos testes, um relógio falso e uma semente fixa (`seed`) deixam os resultados sempre iguais.
 - O servidor escuta apenas em `127.0.0.1` (não fica acessível pela rede).
 - A interface usa páginas separadas renderizadas pelo Flask (uma URL por tela), não uma aplicação de página única. Ao trocar de tela, os timers da anterior são encerrados automaticamente.
 - Nenhum arquivo é carregado da internet (fontes do sistema, ícones SVG locais), porque a apresentação será em outro computador, possivelmente offline.
