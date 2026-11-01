@@ -15,10 +15,10 @@ def add_vehicle_with_diagnostic(db_path):
         (cur.lastrowid,),
     )
     conn.execute(
-        "INSERT INTO fault_codes (code, description, system, explanation, causes_json, symptoms_json,"
-        " checks_json, created_at) VALUES ('P0301', 'd', 's', 'e', '[]', '[]', '[]', 't')"
+        "INSERT INTO diagnostic_faults (diagnostic_id, fault_code_id)"
+        " SELECT ?, id FROM fault_codes WHERE code = 'P0301'",
+        (diag.lastrowid,),
     )
-    conn.execute("INSERT INTO diagnostic_faults (diagnostic_id, fault_code_id) VALUES (?, 1)", (diag.lastrowid,))
     conn.commit()
     conn.close()
 

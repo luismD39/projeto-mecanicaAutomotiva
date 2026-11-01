@@ -23,6 +23,7 @@ PAGES = [
      "template": "vehicles.html",
      "summary": "Cadastre, edite e selecione o veículo fictício usado nas simulações."},
     {"endpoint": "scanner", "path": "/scanner", "title": "Scanner", "icon": "scan", "phase": 6,
+     "template": "scanner.html",
      "summary": "Execute uma varredura OBD-II simulada no veículo ativo."},
     {"endpoint": "dados", "path": "/dados-em-tempo-real", "title": "Dados em tempo real", "icon": "activity",
      "phase": 5, "template": "live.html",
@@ -34,6 +35,7 @@ PAGES = [
     {"endpoint": "historico", "path": "/historico", "title": "Histórico", "icon": "clock", "phase": 9,
      "summary": "Liste e filtre diagnósticos anteriores e baixe relatórios em PDF."},
     {"endpoint": "codigos", "path": "/codigos-dtc", "title": "Códigos DTC", "icon": "book", "phase": 6,
+     "template": "codes.html",
      "summary": "Pesquise códigos OBD-II, sintomas, possíveis causas e verificações."},
 ]
 

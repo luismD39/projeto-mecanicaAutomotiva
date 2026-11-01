@@ -1,0 +1,213 @@
+[
+  {
+    "code": "P0101",
+    "description": "Faixa/desempenho do circuito do sensor de fluxo de massa de ar (MAF)",
+    "system": "Admissão de ar",
+    "explanation": "A ECU compara o sinal do sensor MAF com o fluxo de ar esperado para a rotação, a posição da borboleta e a carga do motor. O código indica que o sinal ficou fora da faixa ou incoerente com esse valor esperado. Não significa, por si só, que o sensor esteja defeituoso.",
+    "causes": [
+      "Sensor MAF sujo ou contaminado",
+      "Entrada falsa de ar entre o MAF e o coletor de admissão (mangueiras, juntas, abraçadeiras)",
+      "Filtro de ar obstruído ou mal instalado",
+      "Conector ou fiação do MAF com mau contato, oxidação ou dano",
+      "Sensor MAF com defeito"
+    ],
+    "symptoms": [
+      "Luz de anomalia do motor (MIL) acesa",
+      "Marcha lenta irregular",
+      "Hesitação ou falta de potência na aceleração",
+      "Consumo de combustível alterado",
+      "Em alguns casos, nenhum sintoma perceptível"
+    ],
+    "checks": [
+      "Inspecionar o filtro de ar e os dutos de admissão",
+      "Procurar entrada falsa de ar depois do MAF",
+      "Verificar alimentação, aterramento e sinal do MAF conforme o manual do fabricante",
+      "Comparar a leitura do MAF (g/s) com valores de referência do motor em marcha lenta e em aceleração",
+      "Observar as correções de combustível (STFT e LTFT)",
+      "Limpar o sensor somente com produto específico, se o fabricante permitir"
+    ]
+  },
+  {
+    "code": "P0115",
+    "description": "Mau funcionamento do circuito do sensor de temperatura do líquido de arrefecimento do motor (ECT)",
+    "system": "Arrefecimento",
+    "explanation": "A ECU detectou um sinal elétrico do sensor ECT fora do esperado, como circuito aberto, curto-circuito ou valor implausível. Sem uma leitura confiável, a ECU costuma adotar um valor substituto e pode ligar a ventoinha por segurança.",
+    "causes": [
+      "Conector do sensor solto ou oxidado",
+      "Fiação rompida ou em curto-circuito",
+      "Sensor ECT com defeito",
+      "Problema na tensão de referência ou no aterramento do circuito",
+      "Falha na ECU (menos comum)"
+    ],
+    "symptoms": [
+      "Luz de anomalia do motor (MIL) acesa",
+      "Ventoinha ligada o tempo todo",
+      "Dificuldade de partida a frio ou a quente",
+      "Consumo de combustível elevado",
+      "Indicação de temperatura no painel incorreta ou ausente"
+    ],
+    "checks": [
+      "Ler a temperatura ECT nos dados ao vivo e comparar com a temperatura real do motor",
+      "Inspecionar o conector e o chicote do sensor",
+      "Medir a resistência do sensor em diferentes temperaturas e comparar com a tabela do fabricante",
+      "Verificar a tensão de referência e o aterramento do circuito",
+      "Verificar o nível do líquido de arrefecimento"
+    ]
+  },
+  {
+    "code": "P0128",
+    "description": "Temperatura do líquido de arrefecimento abaixo da temperatura de regulação do termostato",
+    "system": "Arrefecimento",
+    "explanation": "O motor demorou mais do que o esperado para atingir a temperatura de trabalho, ou não chegou a atingi-la. É frequente estar relacionado ao termostato abrindo antes da hora, mas o sensor ECT e o acionamento da ventoinha também precisam ser avaliados.",
+    "causes": [
+      "Termostato travado aberto ou abrindo antes da temperatura prevista",
+      "Sensor ECT com leitura incorreta",
+      "Ventoinha funcionando continuamente",
+      "Nível baixo de líquido de arrefecimento",
+      "Trajetos muito curtos em clima frio podem contribuir"
+    ],
+    "symptoms": [
+      "Luz de anomalia do motor (MIL) acesa",
+      "Indicador de temperatura permanece baixo",
+      "Aquecimento interno da cabine fraco",
+      "Consumo de combustível maior"
+    ],
+    "checks": [
+      "Acompanhar a temperatura ECT nos dados ao vivo desde a partida a frio",
+      "Verificar se a mangueira superior do radiador aquece antes do previsto (indício de termostato aberto)",
+      "Verificar se a ventoinha liga apenas quando deveria",
+      "Comparar a leitura do ECT com um termômetro confiável",
+      "Verificar o nível do líquido de arrefecimento"
+    ]
+  },
+  {
+    "code": "P0171",
+    "description": "Sistema muito pobre (banco 1)",
+    "system": "Alimentação de combustível / mistura",
+    "explanation": "Para manter a mistura ar-combustível correta no banco 1, a ECU precisou adicionar combustível além do seu limite de correção (correções de combustível positivas elevadas). Indica excesso de ar ou falta de combustível, mas não aponta uma peça específica.",
+    "causes": [
+      "Entrada falsa de ar (mangueiras de vácuo, juntas do coletor, válvula PCV)",
+      "Pressão ou vazão de combustível baixa (bomba, filtro, regulador)",
+      "Bicos injetores obstruídos",
+      "Leitura incorreta do sensor MAF",
+      "Vazamento no escapamento antes da sonda lambda"
+    ],
+    "symptoms": [
+      "Luz de anomalia do motor (MIL) acesa",
+      "Marcha lenta irregular",
+      "Hesitação ou falta de potência",
+      "Falhas de combustão nos casos mais severos"
+    ],
+    "checks": [
+      "Observar STFT e LTFT em marcha lenta e em rotação mais alta: se melhoram com a rotação, sugere entrada de ar; se pioram, sugere problema de alimentação",
+      "Procurar entrada falsa de ar (teste de fumaça, quando disponível)",
+      "Medir a pressão de combustível e comparar com a especificação",
+      "Verificar a leitura do sensor MAF",
+      "Procurar vazamentos no escapamento antes da sonda lambda"
+    ]
+  },
+  {
+    "code": "P0300",
+    "description": "Falhas de combustão aleatórias/múltiplas detectadas",
+    "system": "Ignição / combustão",
+    "explanation": "A ECU detectou variações na rotação do virabrequim compatíveis com falha de combustão em mais de um cilindro, ou sem um cilindro definido. A MIL piscando indica falha severa, que pode danificar o catalisador.",
+    "causes": [
+      "Velas, cabos ou bobinas de ignição desgastados",
+      "Mistura pobre (entrada falsa de ar, pressão de combustível baixa)",
+      "Combustível de má qualidade ou contaminado",
+      "Problemas mecânicos, como compressão baixa ou válvulas com vedação ruim",
+      "Problemas no sinal de rotação do virabrequim"
+    ],
+    "symptoms": [
+      "Luz de anomalia do motor (MIL) acesa ou piscando",
+      "Trepidação do motor",
+      "Falta de potência",
+      "Marcha lenta irregular"
+    ],
+    "checks": [
+      "Verificar se há outros códigos registrados, como P0171",
+      "Consultar contadores de falha por cilindro, quando o equipamento oferecer",
+      "Inspecionar o sistema de ignição (velas, cabos, bobinas)",
+      "Medir a pressão de combustível",
+      "Realizar teste de compressão",
+      "Evitar rodar com a MIL piscando"
+    ]
+  },
+  {
+    "code": "P0301",
+    "description": "Falha de combustão detectada no cilindro 1",
+    "system": "Ignição / combustão",
+    "explanation": "A ECU detectou falha de combustão no cilindro 1. O código indica o cilindro, mas não a causa: a origem pode estar na ignição, na injeção ou na condição mecânica do cilindro.",
+    "causes": [
+      "Vela de ignição do cilindro 1 desgastada ou danificada",
+      "Bobina ou cabo de ignição do cilindro 1 com defeito",
+      "Bico injetor do cilindro 1 obstruído ou sem acionamento",
+      "Compressão baixa no cilindro 1 (válvulas, anéis, junta do cabeçote)",
+      "Entrada falsa de ar próxima ao cilindro 1"
+    ],
+    "symptoms": [
+      "Marcha lenta irregular ou trepidação",
+      "Falta de potência",
+      "Luz de anomalia do motor (MIL) acesa ou piscando",
+      "Consumo de combustível maior"
+    ],
+    "checks": [
+      "Inspecionar a vela do cilindro 1",
+      "Trocar a bobina do cilindro 1 de posição com a de outro cilindro e verificar se a falha acompanha a bobina",
+      "Verificar o acionamento e a resistência do bico injetor do cilindro 1",
+      "Realizar teste de compressão ou de estanqueidade no cilindro 1",
+      "Verificar conectores e chicote de ignição e injeção"
+    ]
+  },
+  {
+    "code": "P0420",
+    "description": "Eficiência do sistema catalisador abaixo do limite (banco 1)",
+    "system": "Emissões / escapamento",
+    "explanation": "A ECU compara os sinais das sondas lambda antes e depois do catalisador. Quando o sinal posterior fica parecido com o anterior, ela entende que o catalisador está armazenando pouco oxigênio, ou seja, com eficiência reduzida.",
+    "causes": [
+      "Catalisador desgastado ou danificado",
+      "Sonda lambda pós-catalisador com defeito ou resposta lenta",
+      "Vazamento no escapamento",
+      "Falhas de combustão ou mistura rica por longo período, que danificaram o catalisador",
+      "Contaminação por óleo, aditivos ou combustível inadequado"
+    ],
+    "symptoms": [
+      "Luz de anomalia do motor (MIL) acesa",
+      "Muitas vezes, nenhum sintoma de dirigibilidade",
+      "Possível cheiro de enxofre",
+      "Reprovação em inspeção de emissões"
+    ],
+    "checks": [
+      "Resolver antes outros códigos (falhas de combustão, mistura pobre ou rica)",
+      "Comparar os sinais das sondas lambda antes e depois do catalisador",
+      "Procurar vazamentos no escapamento",
+      "Verificar a sonda lambda pós-catalisador",
+      "Seguir o procedimento do fabricante para avaliar o catalisador"
+    ]
+  },
+  {
+    "code": "P0500",
+    "description": "Mau funcionamento do sensor de velocidade do veículo (VSS)",
+    "system": "Transmissão / sensores de velocidade",
+    "explanation": "A ECU não recebeu sinal de velocidade ou recebeu um sinal incoerente com outras informações, como rotação, carga e marcha. Em muitos veículos a velocidade vem de um sensor na transmissão ou dos sensores de roda do ABS, transmitida pela rede de comunicação.",
+    "causes": [
+      "Sensor de velocidade (VSS) com defeito",
+      "Fiação ou conector do sensor danificado",
+      "Engrenagem de acionamento do sensor danificada (em alguns modelos)",
+      "Falha de comunicação com o módulo ABS ou o painel, quando a velocidade vem pela rede",
+      "Problema no painel de instrumentos ou na ECU (menos comum)"
+    ],
+    "symptoms": [
+      "Velocímetro parado ou oscilando",
+      "Trocas de marcha irregulares (câmbio automático)",
+      "Piloto automático ou limitador de velocidade inoperante",
+      "Luz de anomalia do motor (MIL) acesa"
+    ],
+    "checks": [
+      "Comparar a velocidade nos dados ao vivo com a velocidade real, em local seguro",
+      "Verificar códigos registrados em outros módulos (ABS, transmissão, painel)",
+      "Inspecionar conector e chicote do sensor",
+      "Verificar o sinal do sensor conforme o procedimento do fabricante"
+    ]
+  }
+]

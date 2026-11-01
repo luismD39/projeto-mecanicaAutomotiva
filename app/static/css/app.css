@@ -240,6 +240,68 @@ main:focus { outline: none; }
 .data-list dt { color: var(--text-muted); }
 .data-list dd { margin: 0; font-weight: 600; text-align: right; }
 
+/* ---------- Scanner ---------- */
+
+.scan-card .card-header { margin-bottom: 0; }
+.scan-steps { list-style: none; margin: 1.25rem 0 0; padding: 0; display: grid; gap: .5rem; }
+.scan-step { display: flex; align-items: center; gap: .75rem; padding: .55rem .75rem; border-radius: 8px; background: var(--bg); }
+.scan-step-text { flex: 1; }
+.scan-step-state { font-size: .8rem; color: var(--text-muted); }
+.scan-step-icon {
+  width: 18px; height: 18px; border-radius: 50%; flex-shrink: 0;
+  border: 2px solid var(--border);
+  display: grid; place-items: center; font-size: 11px; font-weight: 700; line-height: 1;
+}
+.scan-step[data-state="active"] .scan-step-icon { border-color: var(--primary); border-right-color: transparent; animation: spin 1s linear infinite; }
+.scan-step[data-state="active"] .scan-step-state { color: var(--primary); }
+.scan-step[data-state="done"] .scan-step-icon { border-color: var(--ok); background: var(--ok); color: var(--bg); }
+.scan-step[data-state="done"] .scan-step-icon::before { content: "✓"; }
+.scan-step[data-state="done"] .scan-step-state { color: var(--ok); }
+.scan-step[data-state="failed"] .scan-step-icon { border-color: var(--crit); background: var(--crit); color: #fff; }
+.scan-step[data-state="failed"] .scan-step-icon::before { content: "!"; }
+.scan-step[data-state="failed"] .scan-step-state { color: #FCA5A5; }
+
+#scan-result { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1rem; margin-top: 1rem; }
+#scan-result:empty { display: none; }
+#scan-result .grid--2 { margin: 0; }
+.result-header, #detail-card { scroll-margin-top: 5rem; } /* não ficar atrás da barra fixa do topo */
+.result-top { display: flex; flex-wrap: wrap; align-items: center; gap: .75rem; margin-bottom: .5rem; }
+.result-top h2 { margin: 0; }
+.result-summary { font-size: 1.05rem; font-weight: 600; margin-bottom: .25rem; }
+.result-section h3 { font-size: 1rem; margin-bottom: .75rem; }
+.result-section > .hint { margin-top: .75rem; }
+
+.fault-list { list-style: none; margin: 0; padding: 0; display: grid; gap: .75rem; }
+.fault-item { display: flex; gap: .75rem; align-items: flex-start; }
+.fault-item div { display: grid; gap: .15rem; }
+.fault-code {
+  flex-shrink: 0; font-weight: 700; font-family: Consolas, "Courier New", monospace;
+  padding: .2rem .5rem; border-radius: 6px; background: rgb(245 158 11 / .12); color: var(--warn);
+  border: 1px solid rgb(245 158 11 / .5); text-decoration: none;
+}
+.fault-code:hover { text-decoration: underline; }
+
+/* ---------- Catálogo DTC ---------- */
+
+.code-list { list-style: none; margin: .75rem 0 0; padding: 0; display: grid; gap: .4rem; }
+.code-item {
+  width: 100%; display: grid; gap: .1rem; text-align: left; cursor: pointer;
+  padding: .6rem .75rem; border-radius: 8px; border: 1px solid var(--border);
+  background: var(--bg); color: var(--text); font: inherit;
+}
+.code-item:hover { border-color: var(--primary); }
+.code-item[aria-current="true"] { border-color: var(--primary); background: rgb(14 165 233 / .12); box-shadow: inset 3px 0 0 var(--primary); }
+.code-item-code { font-family: Consolas, "Courier New", monospace; }
+.code-item-desc { font-size: .85rem; color: var(--text-muted); }
+
+.detail-header { display: flex; flex-wrap: wrap; align-items: center; gap: .75rem; }
+.detail-code { font-size: 1.6rem; font-family: Consolas, "Courier New", monospace; margin: 0; }
+.detail-title { font-size: 1.05rem; font-weight: 600; margin: .5rem 0 .75rem; }
+.detail-section { margin-top: 1.25rem; }
+.detail-section h4 { margin: 0 0 .4rem; font-size: .95rem; }
+.bullet-list { margin: 0; padding-left: 1.25rem; display: grid; gap: .3rem; }
+.notice--compact { margin: 1.25rem 0 0; font-size: .9rem; }
+
 /* Estados: carregando, vazio e erro */
 .state {
   display: flex; flex-direction: column; align-items: center; gap: .5rem;

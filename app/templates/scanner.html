@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="notice" role="note">
+  {{ icon("info") }}
+  <p><strong>Varredura didática.</strong> O scanner lê a ECU simulada do AutoScan Pro, não um veículo real.
+    Os códigos OBD-II são reais, mas as leituras e falhas são geradas pelo simulador.</p>
+</div>
+
+{% if active_vehicle %}
+<section class="card scan-card" aria-labelledby="titulo-varredura">
+  <div class="card-header">
+    <div>
+      <h2 id="titulo-varredura">Varredura do veículo ativo</h2>
+      <p class="hint">{{ active_vehicle.make }} {{ active_vehicle.model }} {{ active_vehicle.year }}
+        {%- if active_vehicle.engine %} · {{ active_vehicle.engine }}{% endif %} · {{ active_vehicle.fuel_label }}</p>
+    </div>
+    <button type="button" class="btn btn--primary" id="scan-btn">{{ icon("scan") }}Iniciar varredura</button>
+  </div>
+
+  <ol class="scan-steps" id="scan-steps" hidden>
+    {% for step in ["Verificando veículo ativo", "Conectando à ECU simulada", "Lendo parâmetros dos sensores",
+                    "Lendo códigos de falha (DTC)", "Salvando diagnóstico"] %}
+    <li class="scan-step" data-state="pending">
+      <span class="scan-step-icon" aria-hidden="true"></span>
+      <span class="scan-step-text">{{ step }}</span>
+      <span class="scan-step-state">Aguardando</span>
+    </li>
+    {% endfor %}
+  </ol>
+  <p class="sr-only" id="scan-announcer" role="status" aria-live="polite"></p>
+</section>
+
+<div id="scan-result" aria-live="polite"></div>
+{% else %}
+<section class="card">
+  {{ state("empty", "Nenhum veículo ativo",
+           "A varredura é feita no veículo ativo. Cadastre ou selecione um veículo fictício primeiro.",
+           "Ir para Veículos", url_for("pages.veiculos")) }}
+</section>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+{% if active_vehicle %}<script src="{{ url_for('static', filename='js/scanner.js') }}"></script>{% endif %}
+{% endblock %}

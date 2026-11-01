@@ -13,7 +13,8 @@ Simulador didático de diagnóstico automotivo, feito como projeto acadêmico pa
 | 3. Cadastro de veículos e veículo ativo | Concluída |
 | 4. Simulador de ECU (API) | Concluída |
 | 5. Dashboard e Dados em tempo real | Concluída |
-| 6 a 10 | Pendentes (ver `DEVELOPMENT_PLAN.md`) |
+| 6. Catálogo DTC e Scanner | Concluída |
+| 7 a 10 | Pendentes (ver `DEVELOPMENT_PLAN.md`) |
 
 As telas que ainda não foram implementadas abrem normalmente e informam em qual fase ganham funções. Elas não exibem botões sem ação.
 
@@ -122,6 +123,37 @@ Sensor sem leitura (ex.: ECT desconectado) aparece como **"Sem leitura"**. Veloc
 As duas telas consultam `/api/sensors/live` a cada 1 segundo, sem recarregar a página. O próximo pedido só sai depois que o anterior termina, nunca há dois ao mesmo tempo, e a atualização pausa quando a aba fica em segundo plano.
 
 O Chart.js 4.4.1 (licença MIT) está em `app/static/vendor/`, dentro do projeto, para funcionar sem internet.
+
+## Catálogo de códigos DTC
+
+O catálogo começa com os 8 códigos da especificação (P0101, P0115, P0128, P0171, P0300, P0301, P0420 e P0500). Cada um traz descrição em português, sistema, explicação, possíveis causas, sintomas e verificações recomendadas.
+
+O conteúdo fica em **`app/data/fault_codes.json`**, para ser revisado ou ampliado sem mexer no código. A cada inicialização ele é carregado no banco: códigos novos são inseridos e os existentes são atualizados, sem duplicar. Se o arquivo tiver um campo vazio ou mal formatado, o servidor não inicia e mostra qual código está com problema.
+
+A busca aceita código (`P0301`, `p030`) ou palavras (`combustao`, `mistura pobre`) e ignora acentos e maiúsculas.
+
+| Método | Endereço | Ação |
+|---|---|---|
+| GET | `/api/fault-codes?q=texto` | Busca (sem `q`, lista todos) |
+| GET | `/api/fault-codes/<código>` | Detalhe (404 se não existir) |
+
+## Scanner
+
+A tela Scanner faz a varredura no veículo ativo. As etapas de progresso são uma animação na tela; o resultado vem do servidor, que:
+
+1. confere se há veículo ativo (se não houver, responde 409 com explicação);
+2. lê a ECU simulada e classifica cada leitura (normal, atenção, crítico);
+3. busca no catálogo os DTCs gerados pelos cenários ativos;
+4. salva o diagnóstico, os códigos e as leituras numa única transação.
+
+O resultado separa **códigos de falha armazenados** (DTC) de **condições observadas** (leituras fora dos limites didáticos). Todo código vem com a ressalva de que ele não confirma sozinho a peça defeituosa. As hipóteses diagnósticas, geradas por regras, chegam na Fase 7.
+
+O diagnóstico guarda uma cópia de tudo o que foi lido. Mudar o simulador, os limites ou o catálogo depois **não altera** diagnósticos já salvos.
+
+| Método | Endereço | Ação |
+|---|---|---|
+| POST | `/api/scanner/start` | Faz a varredura e salva (201) |
+| GET | `/api/diagnostics/<id>` | Diagnóstico salvo: veículo, DTCs, condições e leituras |
 
 ## Erros
 

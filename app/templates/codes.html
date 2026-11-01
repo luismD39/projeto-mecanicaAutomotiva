@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="split">
+  <section class="card" aria-labelledby="titulo-busca">
+    <h2 id="titulo-busca">Buscar código</h2>
+    <form id="search-form" class="form" role="search" onsubmit="return false">
+      <div class="field">
+        <label for="q">Código ou palavra-chave</label>
+        <input id="q" name="q" type="search" maxlength="50" autocomplete="off"
+               placeholder="Ex.: P0301, combustão, temperatura" aria-describedby="q-hint">
+        <p class="field-hint" id="q-hint">A busca ignora acentos e maiúsculas.</p>
+      </div>
+    </form>
+    <p class="hint" id="result-count" aria-live="polite"></p>
+    <div id="code-list"></div>
+  </section>
+
+  <section class="card" aria-labelledby="titulo-detalhe" id="detail-card">
+    <h2 id="titulo-detalhe" class="sr-only">Detalhe do código</h2>
+    <div id="code-detail">
+      {{ state("empty", "Selecione um código", "Escolha um código na lista para ver explicação, possíveis causas, sintomas e verificações.") }}
+    </div>
+  </section>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/codes.js') }}"></script>
+{% endblock %}
