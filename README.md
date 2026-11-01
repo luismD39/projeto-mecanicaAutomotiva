@@ -19,7 +19,7 @@ Simulador didático de diagnóstico automotivo, feito como projeto acadêmico pa
 | 9. Histórico e relatório PDF | Concluída |
 | 10. Qualidade, segurança e pacote portátil | Concluída |
 
-Todas as telas e botões estão funcionando. São 209 testes automatizados (`python -m pytest`), e o roteiro manual do `TEST_PLAN.md` foi executado de ponta a ponta numa instalação limpa feita a partir do pacote portátil.
+Todas as telas e botões estão funcionando. São 210 testes automatizados (`python -m pytest`), e o roteiro manual do `TEST_PLAN.md` foi executado de ponta a ponta numa instalação limpa feita a partir do pacote portátil.
 
 ## Usar em outro computador (apresentação)
 
@@ -37,6 +37,30 @@ Para levar o programa a um computador sem este projeto, por exemplo o da escola:
    - para encerrar, feche a janela preta.
 
 O outro computador precisa ter Python 3.11 a 3.14 instalado. Se não tiver, o `iniciar.bat` explica como instalar, inclusive sem senha de administrador. O arquivo `LEIA-ME.txt` dentro do pacote tem as instruções para quem vai usar.
+
+## Publicar no Render (testes pelo celular)
+
+Para colegas testarem pelo celular ou sem instalar nada, o projeto pode ser publicado no Render e acessado por um link. **Use só para testes**: a especificação deixa hospedagem pública fora da versão 1.0.
+
+A configuração está em `render.yaml`:
+- servidor gunicorn com **um único processo**, porque o simulador fica na memória;
+- verificação de saúde em `/api/health`;
+- Python 3.12.
+
+Primeira publicação:
+1. Faça commit e push de tudo para o GitHub (o Render lê o código de lá).
+2. Crie uma conta em <https://render.com> e conecte sua conta do GitHub.
+3. No painel do Render: **New → Blueprint**, escolha o repositório e clique em **Apply**. O Render lê o `render.yaml` e cria o serviço `autoscan-pro`.
+4. Espere o build terminar (alguns minutos). O link aparece no topo da página do serviço, algo como `https://autoscan-pro.onrender.com` (ou com um sufixo, se o nome já estiver em uso).
+5. Abra o link, entre em **Veículos → Carregar veículos de demonstração** e mande o link para a turma.
+
+Depois disso, cada `git push` publica a versão nova automaticamente.
+
+No plano gratuito (confira as condições atuais no site do Render):
+- **O servidor dorme** depois de cerca de 15 minutos sem acesso, e o primeiro acesso seguinte leva por volta de 1 minuto.
+- **O banco é apagado** quando o servidor reinicia ou recebe uma versão nova. Basta carregar os veículos de demonstração de novo.
+- **Todos compartilham o mesmo simulador e o mesmo banco**: uma falha ativada por um colega aparece para todos, e qualquer um pode excluir veículos sem histórico. Combine, por exemplo, uma pessoa por vez no Laboratório.
+- **O link é público e sem login.** Só há dados fictícios; não cadastre nada real.
 
 ## Requisitos
 
@@ -269,7 +293,7 @@ Erros de validação retornam 422 com uma mensagem por campo:
 python -m pytest
 ```
 
-São 209 testes que cobrem:
+São 210 testes que cobrem:
 - banco, seed e chaves estrangeiras;
 - validação e CRUD de veículos;
 - simulador, com relógio falso e semente fixa para os resultados não variarem;
@@ -346,6 +370,6 @@ empacotar.py      gera dist/AutoScanPro.zip para levar a outro computador
 - Sem login: a aplicação é local e de uso único.
 - O simulador é **um só por servidor**: todas as abas abertas compartilham o mesmo estado, e ele volta ao normal quando o servidor reinicia.
 - Os limites dos sensores e das regras são didáticos, não especificações de um veículo.
-- O servidor é o de desenvolvimento do Flask, adequado para uso local, não para hospedagem pública.
+- No computador, o servidor é o de desenvolvimento do Flask, adequado para uso local. A publicação no Render usa o gunicorn, mas é só para testes: não tem login e o banco não é permanente.
 - O pacote portátil é só para Windows 64 bits com Python 3.11 a 3.14. No Linux, siga a instalação normal.
 - Testado no Chromium (navegador embutido) em tamanho de computador e de celular. Não foi testado no Firefox nem num celular de verdade.

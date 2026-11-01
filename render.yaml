@@ -1,0 +1,14 @@
+# Publicação de TESTE no Render (plano gratuito). Ver "Publicar no Render" no README.
+services:
+  - type: web
+    name: autoscan-pro
+    runtime: python
+    plan: free
+    # gunicorn só é usado no Render (Linux); por isso não fica no requirements.txt.
+    buildCommand: pip install -r requirements.txt gunicorn==23.0.0
+    # UM processo só: o simulador fica na memória, e vários processos teriam simuladores diferentes.
+    startCommand: gunicorn --workers 1 --threads 8 --bind 0.0.0.0:$PORT "app:create_app()"
+    healthCheckPath: /api/health
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12.7"

@@ -16,6 +16,16 @@ def test_write_from_own_pages_is_allowed(client):
     assert resp.status_code == 201
 
 
+def test_https_origin_behind_proxy_is_allowed(client):
+    # No Render, a página é https, mas o Flask recebe http do proxy: o endereço é o mesmo.
+    resp = client.post("/api/simulator/reset", base_url="http://autoscan-pro.onrender.com",
+                       headers={"Origin": "https://autoscan-pro.onrender.com"})
+    assert resp.status_code == 200
+    resp = client.post("/api/simulator/reset", base_url="http://autoscan-pro.onrender.com",
+                       headers={"Origin": "https://autoscan-pro.onrender.com.site-malicioso.example"})
+    assert resp.status_code == 403
+
+
 def test_reads_are_not_affected_by_origin(client):
     assert client.get("/api/health", headers={"Origin": "http://outro.example"}).status_code == 200
 

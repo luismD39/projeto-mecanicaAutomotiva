@@ -1,4 +1,6 @@
-"""Proteções básicas para um servidor local."""
+"""Proteções básicas (servidor local e publicação de testes no Render)."""
+
+from urllib.parse import urlparse
 
 from flask import abort, request
 
@@ -10,8 +12,9 @@ def register_security(app) -> None:
     def block_cross_site_writes():
         # Outro site aberto no mesmo navegador poderia enviar POST para 127.0.0.1 (CSRF).
         # O navegador informa a origem; só aceitamos ações vindas das páginas do próprio AutoScan Pro.
+        # Compara só o endereço (host:porta): no Render o navegador usa https, mas o Flask recebe http do proxy.
         origin = request.headers.get("Origin")
-        if request.method in WRITE_METHODS and origin and origin != request.host_url.rstrip("/"):
+        if request.method in WRITE_METHODS and origin and urlparse(origin).netloc != request.host:
             abort(403)
 
     @app.after_request
