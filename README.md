@@ -14,7 +14,8 @@ Simulador didático de diagnóstico automotivo, feito como projeto acadêmico pa
 | 4. Simulador de ECU (API) | Concluída |
 | 5. Dashboard e Dados em tempo real | Concluída |
 | 6. Catálogo DTC e Scanner | Concluída |
-| 7 a 10 | Pendentes (ver `DEVELOPMENT_PLAN.md`) |
+| 7. Motor de regras e tela Diagnósticos | Concluída |
+| 8 a 10 | Pendentes (ver `DEVELOPMENT_PLAN.md`) |
 
 As telas que ainda não foram implementadas abrem normalmente e informam em qual fase ganham funções. Elas não exibem botões sem ação.
 
@@ -146,7 +147,40 @@ A tela Scanner faz a varredura no veículo ativo. As etapas de progresso são um
 3. busca no catálogo os DTCs gerados pelos cenários ativos;
 4. salva o diagnóstico, os códigos e as leituras numa única transação.
 
-O resultado separa **códigos de falha armazenados** (DTC) de **condições observadas** (leituras fora dos limites didáticos). Todo código vem com a ressalva de que ele não confirma sozinho a peça defeituosa. As hipóteses diagnósticas, geradas por regras, chegam na Fase 7.
+O resultado separa três coisas:
+
+1. **Códigos de falha armazenados (DTC)**: o que a ECU simulada registrou. Todo código vem com a ressalva de que não confirma sozinho a peça defeituosa.
+2. **Condições observadas**: leituras fora dos limites didáticos (podem existir sem nenhum DTC, como no superaquecimento).
+3. **Hipóteses**: geradas pelo motor de regras (abaixo), indicando o que investigar.
+
+## Motor de regras
+
+As regras ficam em `app/services/rules.py`. São funções Python explícitas, **sem inteligência artificial**. Cada resultado traz:
+- título e nível (Informativo, Atenção ou Crítico);
+- evidências observadas;
+- hipóteses possíveis;
+- verificações recomendadas;
+- identificador da regra que disparou;
+- aviso de orientação didática.
+
+| Regra | Dispara quando | Nível |
+|---|---|---|
+| `R-ECT-ALTA` | ECT ≥ 105 °C | Atenção (Crítico a partir de 115 °C) |
+| `R-VENTOINHA` | ECT ≥ 100 °C com ventoinha desligada | Atenção (Crítico a partir de 115 °C) |
+| `R-ECT-SINAL` | Sem leitura válida de ECT (cita P0115 e a ventoinha de segurança, se presentes) | Atenção |
+| `R-TENSAO-BAIXA` | Tensão ≤ 13,0 V com motor funcionando (≥ 400 rpm) | Atenção (Crítico a partir de 12,0 V) |
+| `R-TENSAO-ALTA` | Tensão ≥ 14,8 V | Atenção (Crítico a partir de 15,5 V) |
+| `R-COMBUSTAO` | DTC P0300 ou P0301 (se houver P0171 junto, sugere investigar a mistura primeiro) | Atenção |
+| `R-MISTURA-POBRE` | DTC P0171 com correções positivas (LTFT ≥ 10% ou soma ≥ 20%); sem correções altas, vira Informativo | Atenção / Informativo |
+| `R-CORRECAO-ALTA` | Correções positivas altas sem DTC | Atenção |
+| `R-VELOCIDADE` | DTC P0500, ou velocidade 0 com rotação ≥ 1500 rpm e borboleta ≥ 10% | Atenção |
+| `R-DTC-GERAL` | Qualquer outro DTC sem regra específica | Informativo |
+
+Os limites são **didáticos/ilustrativos**. As faixas dos sensores vêm de `sensor_status.THRESHOLDS` (as mesmas do Dashboard). Os limites próprios das regras ficam em `rules.RULE_LIMITS`.
+
+As regras rodam no momento da varredura e o resultado é salvo junto com o diagnóstico. Mudar uma regra depois **não altera** diagnósticos já salvos.
+
+A tela **Diagnósticos** mostra o diagnóstico mais recente, ou um específico com `/diagnosticos?id=N` (o Dashboard usa esse link).
 
 O diagnóstico guarda uma cópia de tudo o que foi lido. Mudar o simulador, os limites ou o catálogo depois **não altera** diagnósticos já salvos.
 

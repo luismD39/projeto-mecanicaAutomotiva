@@ -4,7 +4,7 @@ import logging
 import sqlite3
 from datetime import datetime
 
-from flask import Blueprint, render_template
+from flask import Blueprint, render_template, request
 
 from app.db import get_db
 from app.services import diagnostics, sensor_status, simulator, vehicles
@@ -29,6 +29,7 @@ PAGES = [
      "phase": 5, "template": "live.html",
      "summary": "Acompanhe os parâmetros simulados do motor em cartões e gráficos."},
     {"endpoint": "diagnosticos", "path": "/diagnosticos", "title": "Diagnósticos", "icon": "clipboard", "phase": 7,
+     "template": "diagnostics.html",
      "summary": "Detalhe do diagnóstico mais recente: DTCs, evidências, hipóteses e recomendações."},
     {"endpoint": "laboratorio", "path": "/laboratorio", "title": "Laboratório de falhas", "icon": "flask",
      "phase": 8, "summary": "Ative e desative cenários de falha para a demonstração."},
@@ -62,6 +63,9 @@ def _extra_context(endpoint: str) -> dict:
         return {"sensors": simulator.SENSORS, "dashboard_sensors": DASHBOARD_SENSORS,
                 "last_diagnostic": diagnostics.get_latest(db, active["id"]) if active else None,
                 "thresholds_notice": sensor_status.NOTICE}
+    if endpoint == "diagnosticos":
+        # ?id=N abre um diagnóstico específico; sem id, o mais recente. O JS consulta a API e trata 404.
+        return {"diagnostic_id": request.args.get("id", type=int) or diagnostics.get_latest_id(get_db())}
     if endpoint == "dados":
         return {"sensors": simulator.SENSORS, "modes": simulator.MODES,
                 "thresholds_notice": sensor_status.NOTICE}

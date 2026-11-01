@@ -30,7 +30,7 @@
   <p class="sr-only" id="scan-announcer" role="status" aria-live="polite"></p>
 </section>
 
-<div id="scan-result" aria-live="polite"></div>
+<div id="scan-result" class="diagnostic-result" aria-live="polite"></div>
 {% else %}
 <section class="card">
   {{ state("empty", "Nenhum veículo ativo",
@@ -41,5 +41,8 @@
 {% endblock %}
 
 {% block scripts %}
-{% if active_vehicle %}<script src="{{ url_for('static', filename='js/scanner.js') }}"></script>{% endif %}
+{% if active_vehicle %}
+<script src="{{ url_for('static', filename='js/diagnostic-view.js') }}"></script>
+<script src="{{ url_for('static', filename='js/scanner.js') }}"></script>
+{% endif %}
 {% endblock %}

@@ -1,6 +1,11 @@
-"""Consultas de diagnósticos salvos. A varredura que cria diagnósticos chega na Fase 6."""
+"""Consultas de diagnósticos salvos. A varredura que os cria fica em scanner.py."""
 
 import sqlite3
+
+
+def get_latest_id(db: sqlite3.Connection) -> int | None:
+    row = db.execute("SELECT id FROM diagnostics ORDER BY completed_at DESC, id DESC LIMIT 1").fetchone()
+    return row["id"] if row else None
 
 
 def get_latest(db: sqlite3.Connection, vehicle_id: int) -> dict | None:

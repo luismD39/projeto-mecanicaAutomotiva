@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block content %}
+{% if diagnostic_id %}
+<div id="diagnostic" class="diagnostic-result" data-id="{{ diagnostic_id }}" aria-live="polite"></div>
+{% else %}
+<section class="card">
+  {{ state("empty", "Nenhum diagnóstico salvo",
+           "Faça uma varredura no Scanner. O resultado, com códigos, condições observadas e hipóteses, aparece aqui.",
+           "Ir para o Scanner", url_for("pages.scanner")) }}
+</section>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+{% if diagnostic_id %}
+<script src="{{ url_for('static', filename='js/diagnostic-view.js') }}"></script>
+<script src="{{ url_for('static', filename='js/diagnostics.js') }}"></script>
+{% endif %}
+{% endblock %}

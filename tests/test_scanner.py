@@ -95,6 +95,57 @@ def test_dashboard_shows_scan(client, vehicle_id):
     assert "1 código de falha armazenado." in html
 
 
+def test_scan_stores_rule_findings(client, vehicle_id, db_path):
+    client.post("/api/simulator/scenarios/misfire_cyl1/activate")
+    data = scan(client).get_json()
+    assert [f["rule_id"] for f in data["findings"]] == ["R-COMBUSTAO"]
+    assert data["summary"] == "1 código de falha armazenado. 1 resultado na análise por regras."
+    conn = connect(db_path)
+    stored = conn.execute("SELECT findings_json FROM diagnostics WHERE id = ?", (data["diagnostic_id"],)).fetchone()[0]
+    conn.close()
+    assert "R-COMBUSTAO" in stored
+
+
+def test_critical_finding_makes_diagnostic_critical(client, vehicle_id, monkeypatch):
+    from app.services import rules
+
+    critical = {"rule_id": "R-TESTE", "title": "t", "level": "crit", "level_label": "Crítico", "evidence": ["e"],
+                "hypotheses": ["h"], "checks": ["c"], "related_dtcs": [], "disclaimer": "d"}
+    monkeypatch.setattr(rules, "evaluate", lambda snapshot: [critical])
+    data = scan(client).get_json()
+    assert data["status"] == "crit"
+    assert data["status_label"] == "Crítico"
+
+
+def test_saved_findings_do_not_change_when_rules_change(client, vehicle_id, monkeypatch):
+    from app.services import rules
+
+    client.post("/api/simulator/scenarios/misfire_cyl1/activate")
+    original = scan(client).get_json()
+    monkeypatch.setattr(rules, "evaluate", lambda snapshot: [])
+    assert client.get(f"/api/diagnostics/{original['diagnostic_id']}").get_json()["findings"] == original["findings"]
+
+
+def test_diagnostics_page_without_diagnostics(client):
+    html = client.get("/diagnosticos").get_data(as_text=True)
+    assert "Nenhum diagnóstico salvo" in html
+    assert "diagnostics.js" not in html
+
+
+def test_diagnostics_page_opens_latest_or_requested(client, vehicle_id):
+    first = scan(client).get_json()["diagnostic_id"]
+    second = scan(client).get_json()["diagnostic_id"]
+    assert f'data-id="{second}"' in client.get("/diagnosticos").get_data(as_text=True)
+    assert f'data-id="{first}"' in client.get(f"/diagnosticos?id={first}").get_data(as_text=True)
+    # id inválido não quebra a página: cai no mais recente
+    assert f'data-id="{second}"' in client.get("/diagnosticos?id=abc").get_data(as_text=True)
+
+
+def test_dashboard_links_to_its_diagnostic(client, vehicle_id):
+    did = scan(client).get_json()["diagnostic_id"]
+    assert f'href="/diagnosticos?id={did}"' in client.get("/").get_data(as_text=True)
+
+
 def test_missing_diagnostic_returns_404(client):
     resp = client.get("/api/diagnostics/999")
     assert resp.status_code == 404

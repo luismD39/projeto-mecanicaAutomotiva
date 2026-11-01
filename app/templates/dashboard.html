@@ -78,7 +78,7 @@
         <div><dt>Resumo</dt><dd>{{ last_diagnostic.summary }}</dd></div>
       </dl>
       <div class="form-actions quick-links">
-        <a class="btn btn--secondary" href="{{ url_for('pages.diagnosticos') }}">Ver diagnóstico</a>
+        <a class="btn btn--secondary" href="{{ url_for('pages.diagnosticos', id=last_diagnostic.id) }}">Ver diagnóstico</a>
       </div>
     {% elif active_vehicle %}
       {{ state("empty", "Nenhuma varredura realizada",

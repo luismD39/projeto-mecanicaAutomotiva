@@ -9,7 +9,7 @@ import logging
 import sqlite3
 from datetime import datetime, timezone
 
-from app.services import fault_codes, sensor_status, vehicles
+from app.services import fault_codes, rules, sensor_status, vehicles
 from app.services.errors import ConflictError, NotFoundError
 from app.services.simulator import EcuSimulator
 
@@ -26,22 +26,25 @@ def _plural(n: int, singular: str, plural: str) -> str:
     return f"{n} {singular if n == 1 else plural}"
 
 
-def _summarize(dtc_count: int, alerts: list[dict]) -> tuple[str, str]:
-    """Status geral e frase de resumo, a partir dos DTCs e das condições observadas."""
-    if any(a["status"] == "crit" for a in alerts):
+def _summarize(dtc_count: int, alerts: list[dict], findings: list[dict]) -> tuple[str, str]:
+    """Status geral e frase de resumo, a partir dos DTCs, das condições observadas e das regras."""
+    if any(a["status"] == "crit" for a in alerts) or any(f["level"] == "crit" for f in findings):
         status = "crit"
-    elif dtc_count or alerts:
+    elif dtc_count or alerts or any(f["level"] == "warn" for f in findings):
         status = "warn"
     else:
         status = "ok"
-    if not dtc_count and not alerts:
+    if not dtc_count and not alerts and not findings:
         return status, "Nenhum código de falha armazenado e nenhuma condição fora dos limites didáticos."
     parts = []
     if dtc_count:
         parts.append(_plural(dtc_count, "código de falha armazenado", "códigos de falha armazenados"))
     if alerts:
         parts.append(_plural(len(alerts), "condição fora do limite didático", "condições fora dos limites didáticos"))
-    return status, " e ".join(parts).capitalize() + "."
+    summary = " e ".join(parts).capitalize() + "." if parts else ""
+    if findings:
+        summary += " " + _plural(len(findings), "resultado", "resultados") + " na análise por regras."
+    return status, summary.strip()
 
 
 def start_scan(db: sqlite3.Connection, ecu: EcuSimulator) -> dict:
@@ -64,14 +67,16 @@ def start_scan(db: sqlite3.Connection, ecu: EcuSimulator) -> dict:
             continue
         found.append(row["id"])
 
-    status, summary = _summarize(len(found), snapshot["alerts"])
+    findings = rules.evaluate(snapshot)
+    status, summary = _summarize(len(found), snapshot["alerts"], findings)
     with db:
         cur = db.execute(
             "INSERT INTO diagnostics (vehicle_id, started_at, completed_at, source, status, summary,"
             " scenario_snapshot_json, sensor_snapshot_json, findings_json)"
             " VALUES (?, ?, ?, 'simulation', ?, ?, ?, ?, ?)",
             (vehicle["id"], started_at, _now(), status, summary,
-             json.dumps(scenarios, ensure_ascii=False), json.dumps(snapshot, ensure_ascii=False), "[]"),
+             json.dumps(scenarios, ensure_ascii=False), json.dumps(snapshot, ensure_ascii=False),
+             json.dumps(findings, ensure_ascii=False)),
         )
         diagnostic_id = cur.lastrowid
         db.executemany(
