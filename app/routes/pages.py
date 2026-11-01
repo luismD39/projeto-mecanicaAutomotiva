@@ -4,7 +4,7 @@ import logging
 import sqlite3
 from datetime import datetime
 
-from flask import Blueprint, render_template, request
+from flask import Blueprint, current_app, render_template, request
 
 from app.db import get_db
 from app.services import diagnostics, sensor_status, simulator, vehicles
@@ -32,7 +32,8 @@ PAGES = [
      "template": "diagnostics.html",
      "summary": "Detalhe do diagnóstico mais recente: DTCs, evidências, hipóteses e recomendações."},
     {"endpoint": "laboratorio", "path": "/laboratorio", "title": "Laboratório de falhas", "icon": "flask",
-     "phase": 8, "summary": "Ative e desative cenários de falha para a demonstração."},
+     "phase": 8, "template": "lab.html",
+     "summary": "Ative e desative cenários de falha para a demonstração."},
     {"endpoint": "historico", "path": "/historico", "title": "Histórico", "icon": "clock", "phase": 9,
      "summary": "Liste e filtre diagnósticos anteriores e baixe relatórios em PDF."},
     {"endpoint": "codigos", "path": "/codigos-dtc", "title": "Códigos DTC", "icon": "book", "phase": 6,
@@ -51,6 +52,15 @@ DASHBOARD_SENSORS = [
     ("battery_voltage", "Tensão do módulo"),
 ]
 
+# Sensores que mais mudam com os cenários de falha, mostrados no Laboratório.
+LAB_SENSORS = [
+    ("coolant_temperature", "Temperatura (ECT)"),
+    ("battery_voltage", "Tensão do módulo"),
+    ("rpm", "Rotação (RPM)"),
+    ("vehicle_speed", "Velocidade (VSS)"),
+    ("long_term_fuel_trim", "Correção longo prazo (LTFT)"),
+]
+
 
 def _extra_context(endpoint: str) -> dict:
     if endpoint == "veiculos":
@@ -66,6 +76,10 @@ def _extra_context(endpoint: str) -> dict:
     if endpoint == "diagnosticos":
         # ?id=N abre um diagnóstico específico; sem id, o mais recente. O JS consulta a API e trata 404.
         return {"diagnostic_id": request.args.get("id", type=int) or diagnostics.get_latest_id(get_db())}
+    if endpoint == "laboratorio":
+        return {"ecu_status": current_app.extensions["ecu"].status(), "sensors": simulator.SENSORS,
+                "scenario_names": {sid: s["name"] for sid, s in simulator.SCENARIOS.items()},
+                "lab_sensors": LAB_SENSORS, "thresholds_notice": sensor_status.NOTICE}
     if endpoint == "dados":
         return {"sensors": simulator.SENSORS, "modes": simulator.MODES,
                 "thresholds_notice": sensor_status.NOTICE}

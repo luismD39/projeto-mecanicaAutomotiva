@@ -15,7 +15,8 @@ Simulador didático de diagnóstico automotivo, feito como projeto acadêmico pa
 | 5. Dashboard e Dados em tempo real | Concluída |
 | 6. Catálogo DTC e Scanner | Concluída |
 | 7. Motor de regras e tela Diagnósticos | Concluída |
-| 8 a 10 | Pendentes (ver `DEVELOPMENT_PLAN.md`) |
+| 8. Laboratório de falhas | Concluída |
+| 9 e 10 | Pendentes (ver `DEVELOPMENT_PLAN.md`) |
 
 As telas que ainda não foram implementadas abrem normalmente e informam em qual fase ganham funções. Elas não exibem botões sem ação.
 
@@ -95,6 +96,25 @@ O simulador (`app/services/simulator.py`) mantém um estado que evolui com o tem
 | Falha de velocidade (`vss_failure`) | Velocidade informada fica em 0 km/h mesmo em movimento | P0500 |
 
 "Superaquecimento" e "Sensor ECT desconectado" não podem ficar ativos juntos: sem o sensor, o superaquecimento não poderia ser observado.
+
+### Laboratório de falhas
+
+A tela **Laboratório de falhas** é o painel da demonstração:
+- um cartão por cenário, com descrição, o DTC que ele gera (com link para o catálogo) e o botão **Ativar/Desativar**;
+- cenários em conflito ficam bloqueados, com a explicação no próprio cartão;
+- o resumo no topo mostra os cenários ativos e o botão **Restaurar condições normais** (desativa todos e volta ao modo parado);
+- o quadro "Efeito agora" mostra ao vivo os sensores que mais mudam: temperatura, tensão, rotação, velocidade, correção de combustível e ventoinha.
+
+Os cenários afetam o Dashboard, os Dados em tempo real e a **próxima** varredura. Diagnósticos já salvos não mudam. A demonstração pode ser repetida quantas vezes quiser, sem reiniciar o servidor.
+
+Roteiro sugerido para a apresentação:
+1. Em **Veículos**, cadastre e ative um veículo fictício.
+2. No **Dashboard**, mostre os indicadores normais.
+3. No **Laboratório**, ative "Superaquecimento" e "Falha de combustão no cilindro 1".
+4. Volte ao **Dashboard** e espere a temperatura subir (cerca de 20 a 30 s) até aparecer o alerta.
+5. No **Scanner**, faça a varredura e mostre a diferença entre DTC, condição observada e hipótese.
+6. Clique no código **P0301** para abrir o catálogo.
+7. No **Laboratório**, clique em "Restaurar condições normais" e faça outra varredura limpa.
 
 O estado do simulador fica na memória: ao reiniciar o servidor, ele volta ao normal. Os cadastros (banco) não são afetados. Há **um simulador por servidor**: todas as abas e telas abertas veem o mesmo estado.
 

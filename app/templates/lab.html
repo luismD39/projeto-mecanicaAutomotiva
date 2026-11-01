@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="notice" role="note">
+  {{ icon("info") }}
+  <p><strong>Ambiente de demonstração.</strong> Os cenários alteram apenas a ECU simulada: o Dashboard, os Dados em
+    tempo real e a <strong>próxima</strong> varredura passam a refletir a falha. Diagnósticos já salvos não mudam.</p>
+</div>
+
+<section class="card lab-summary" aria-labelledby="titulo-ativos">
+  <div>
+    <h2 id="titulo-ativos">Cenários ativos</h2>
+    <p id="active-list" aria-live="polite">
+      {%- set active = ecu_status.scenarios | selectattr("active") | map(attribute="name") | list -%}
+      {{ active | join(", ") if active else "Nenhum: a ECU simulada está em condições normais." }}
+    </p>
+    <p class="hint">Modo de condução: <strong id="mode-label">{{ ecu_status.mode_label }}</strong>
+      (altere em <a href="{{ url_for('pages.dados') }}">Dados em tempo real</a>)</p>
+  </div>
+  <div class="form-actions">
+    <button type="button" class="btn btn--primary" id="reset-btn">Restaurar condições normais</button>
+    <a class="btn btn--secondary" href="{{ url_for('pages.scanner') }}">{{ icon("scan") }}Fazer varredura</a>
+  </div>
+</section>
+
+<div class="scenario-grid">
+  {% for s in ecu_status.scenarios %}
+  <article class="card scenario" data-scenario="{{ s.id }}" data-active="{{ 'true' if s.active else 'false' }}"
+           data-conflicts="{{ s.conflicts_with | join(',') }}" aria-labelledby="sc-{{ s.id }}">
+    <div class="scenario-head">
+      <h3 id="sc-{{ s.id }}">{{ s.name }}</h3>
+      <span class="scenario-status">
+        {%- if s.active %}{{ badge("warn", "Ativo") }}{% else %}<span class="muted">Inativo</span>{% endif -%}
+      </span>
+    </div>
+    <p>{{ s.description }}</p>
+    <p class="scenario-dtcs">
+      {% if s.dtcs %}Gera o código {% for code in s.dtcs %}<a class="fault-code" href="{{ url_for('pages.codigos', codigo=code) }}">{{ code }}</a>{% endfor %}
+      {% else %}<span class="muted">Não gera DTC: aparece como condição observada nos sensores.</span>{% endif %}
+    </p>
+    {% for other in s.conflicts_with %}
+    <p class="scenario-conflict hint" data-conflict-with="{{ other }}" hidden>
+      Não pode ficar ativo junto com "{{ scenario_names[other] }}". Desative-o primeiro.</p>
+    {% endfor %}
+    <button type="button" class="btn {{ 'btn--secondary' if s.active else 'btn--primary' }} scenario-toggle"
+            aria-label="{{ ('Desativar ' if s.active else 'Ativar ') ~ s.name }}">
+      {{- "Desativar" if s.active else "Ativar" -}}
+    </button>
+  </article>
+  {% endfor %}
+</div>
+
+<section class="card lab-effect" aria-labelledby="titulo-efeito">
+  <h2 id="titulo-efeito">Efeito agora na ECU simulada</h2>
+  <p class="hint">Atualiza a cada 1 segundo. Alguns efeitos são graduais (ex.: a temperatura sobe cerca de 1 °C por segundo).</p>
+  <div class="kpi-grid">
+    {% for key, label in lab_sensors %}
+      {{ kpi_tile(key, label, sensors[key][1]) }}
+    {% endfor %}
+  </div>
+  <p class="hint thresholds-note">Ventoinha: <strong id="fan-state">—</strong> · {{ thresholds_notice }}</p>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/lab.js') }}"></script>
+{% endblock %}

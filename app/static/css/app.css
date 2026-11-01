@@ -292,6 +292,23 @@ main:focus { outline: none; }
 }
 .fault-code:hover { text-decoration: underline; }
 
+/* ---------- Laboratório de falhas ---------- */
+
+.lab-summary { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1rem; margin-bottom: 1rem; }
+.lab-summary h2 { margin-bottom: .25rem; }
+#active-list { font-weight: 600; }
+.scenario-grid { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr)); }
+.scenario { display: flex; flex-direction: column; gap: .6rem; border-left: 4px solid var(--border); }
+.scenario[data-active="true"] { border-left-color: var(--warn); background: linear-gradient(rgb(245 158 11 / .06), rgb(245 158 11 / .06)), var(--surface); }
+.scenario-head { display: flex; justify-content: space-between; align-items: flex-start; gap: .75rem; }
+.scenario-head h3 { margin: 0; font-size: 1.05rem; }
+.scenario > p { color: var(--text-muted); font-size: .9rem; }
+.scenario-dtcs { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem; }
+.scenario-conflict { color: var(--warn); }
+.scenario-toggle { margin-top: auto; align-self: flex-start; }
+.lab-effect { margin-top: 1rem; }
+.lab-effect .kpi-grid { margin-top: .75rem; }
+
 /* ---------- Catálogo DTC ---------- */
 
 .code-list { list-style: none; margin: .75rem 0 0; padding: 0; display: grid; gap: .4rem; }
