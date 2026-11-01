@@ -18,6 +18,12 @@ def create_vehicle():
     return jsonify(vehicles.create_vehicle(get_db(), request.get_json(silent=True))), 201
 
 
+@bp.post("/demo")
+def create_demo_vehicles():
+    created = vehicles.create_demo_vehicles(get_db())
+    return jsonify({"created": len(created), "vehicles": vehicles.list_vehicles(get_db())}), 201
+
+
 @bp.get("/<int:vehicle_id>")
 def get_vehicle(vehicle_id: int):
     return jsonify(vehicles.get_vehicle(get_db(), vehicle_id))

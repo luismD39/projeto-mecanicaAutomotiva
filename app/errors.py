@@ -11,8 +11,10 @@ logger = logging.getLogger(__name__)
 
 MESSAGES = {
     400: ("BAD_REQUEST", "Requisição inválida."),
+    403: ("FORBIDDEN", "Ação bloqueada: a requisição não veio das páginas do AutoScan Pro."),
     404: ("NOT_FOUND", "Recurso não encontrado."),
     405: ("METHOD_NOT_ALLOWED", "Método HTTP não permitido para este endereço."),
+    413: ("PAYLOAD_TOO_LARGE", "Os dados enviados são grandes demais."),
     422: ("VALIDATION_ERROR", "Verifique os campos informados."),
     500: ("INTERNAL_ERROR", "Erro interno no servidor. Tente novamente."),
 }

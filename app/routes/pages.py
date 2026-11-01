@@ -13,8 +13,7 @@ logger = logging.getLogger(__name__)
 
 bp = Blueprint("pages", __name__)
 
-# "phase" indica em qual fase do DEVELOPMENT_PLAN.md a tela ganha funcionalidade.
-# "template" existe nas telas já implementadas; as demais usam pending.html.
+# "phase" é a fase do DEVELOPMENT_PLAN.md em que a tela foi implementada.
 PAGES = [
     {"endpoint": "dashboard", "path": "/", "title": "Dashboard", "icon": "dashboard", "phase": 5,
      "template": "dashboard.html",
@@ -90,7 +89,7 @@ def _extra_context(endpoint: str) -> dict:
 
 
 def _make_view(page: dict):
-    template = page.get("template", "pending.html")
+    template = page["template"]
 
     def view():
         return render_template(template, page=page, **_extra_context(page["endpoint"]))

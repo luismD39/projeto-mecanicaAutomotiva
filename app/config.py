@@ -11,3 +11,4 @@ APP_VERSION = "1.0.0-dev"
 class Config:
     DATABASE = str(BASE_DIR / "instance" / "autoscan.db")
     TESTING = False
+    MAX_CONTENT_LENGTH = 64 * 1024  # nenhum formulário do sistema chega perto disso

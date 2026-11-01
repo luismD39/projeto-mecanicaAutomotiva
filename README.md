@@ -17,9 +17,26 @@ Simulador didático de diagnóstico automotivo, feito como projeto acadêmico pa
 | 7. Motor de regras e tela Diagnósticos | Concluída |
 | 8. Laboratório de falhas | Concluída |
 | 9. Histórico e relatório PDF | Concluída |
-| 10. Qualidade e entrega | Pendente (ver `DEVELOPMENT_PLAN.md`) |
+| 10. Qualidade, segurança e pacote portátil | Concluída |
 
-As telas que ainda não foram implementadas abrem normalmente e informam em qual fase ganham funções. Elas não exibem botões sem ação.
+Todas as telas e botões estão funcionando. São 209 testes automatizados (`python -m pytest`), e o roteiro manual do `TEST_PLAN.md` foi executado de ponta a ponta numa instalação limpa feita a partir do pacote portátil.
+
+## Usar em outro computador (apresentação)
+
+Para levar o programa a um computador sem este projeto, por exemplo o da escola:
+
+1. **Aqui, com internet**, gere o pacote:
+   ```bash
+   .venv\Scripts\python empacotar.py
+   ```
+   Ele cria `dist/AutoScanPro.zip` (cerca de 33 MB), com o programa e as bibliotecas para Python 3.11 a 3.14 (Windows 64 bits).
+2. Copie o `.zip` para o pendrive.
+3. **No outro computador**, extraia o `.zip` (para a Área de Trabalho, por exemplo) e dê dois cliques em **`iniciar.bat`**:
+   - na primeira vez ele prepara tudo **sem internet**, em menos de um minuto;
+   - o navegador abre sozinho; se a porta 5000 estiver ocupada, ele usa a próxima livre;
+   - para encerrar, feche a janela preta.
+
+O outro computador precisa ter Python 3.11 a 3.14 instalado. Se não tiver, o `iniciar.bat` explica como instalar, inclusive sem senha de administrador. O arquivo `LEIA-ME.txt` dentro do pacote tem as instruções para quem vai usar.
 
 ## Requisitos
 
@@ -46,10 +63,11 @@ Ative o ambiente virtual:
 Instale as dependências:
 
 ```bash
-pip install -r requirements.txt
+pip install -r requirements-dev.txt
 ```
 
-Dependências: Flask (servidor web) e ReportLab (relatório PDF). O pytest e o pypdf são usados somente pelos testes; o pypdf lê o texto dos PDFs gerados para conferir o conteúdo.
+- `requirements.txt`: o que o programa precisa, Flask (servidor web) e ReportLab (relatório PDF).
+- `requirements-dev.txt`: o mesmo, mais o pytest e o pypdf, usados só nos testes (o pypdf lê o texto dos PDFs gerados para conferir o conteúdo).
 
 > Se o PowerShell bloquear o `Activate.ps1`, rode uma vez `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned`, ou use os comandos sem ativar o ambiente: `.venv\Scripts\python run.py`.
 
@@ -62,6 +80,10 @@ python run.py
 Abra <http://127.0.0.1:5000> no navegador. Para conferir só a API, abra <http://127.0.0.1:5000/api/health>.
 
 Se a porta 5000 estiver ocupada, escolha outra antes de iniciar. No PowerShell: `$env:PORT=5050; python run.py`.
+
+`python run.py` roda em **modo de desenvolvimento**: com debug, ele reinicia sozinho ao salvar um `.py`. O `iniciar.bat` do pacote usa o **modo apresentação** (`AUTOSCAN_APRESENTACAO=1`): sem debug, com porta livre automática e navegador aberto sozinho.
+
+Primeira vez usando? Na tela **Veículos**, clique em **Carregar veículos de demonstração**. Isso cadastra três veículos fictícios, e o primeiro já fica ativo.
 
 O banco SQLite é criado automaticamente em `instance/autoscan.db` na primeira execução. Cada computador tem o seu banco, e ele não vai para o repositório. Para começar do zero, pare o servidor e apague esse arquivo.
 
@@ -247,6 +269,27 @@ Erros de validação retornam 422 com uma mensagem por campo:
 python -m pytest
 ```
 
+São 209 testes que cobrem:
+- banco, seed e chaves estrangeiras;
+- validação e CRUD de veículos;
+- simulador, com relógio falso e semente fixa para os resultados não variarem;
+- limites de status;
+- catálogo e busca;
+- varredura e imutabilidade do histórico;
+- cada regra (normal, atenção, crítico e combinações);
+- Laboratório, Histórico com filtros e conteúdo do PDF;
+- navegação (nenhum link quebrado) e segurança.
+
+## Segurança
+
+- O servidor só aceita conexões do próprio computador (`127.0.0.1`).
+- Ações (POST/PUT/DELETE) vindas de outro site aberto no navegador são recusadas (403), o que protege contra CSRF.
+- Todas as consultas SQL são parametrizadas. Todas as entradas são validadas no servidor, além do navegador.
+- Os textos são exibidos com escape (templates Jinja e `textContent` no JavaScript), o que protege contra injeção de HTML.
+- Os erros nunca mostram detalhes internos ao navegador: o detalhe vai para o log do terminal.
+- As requisições são limitadas a 64 KB e as respostas levam os cabeçalhos `X-Content-Type-Options`, `X-Frame-Options` e `Referrer-Policy`.
+- No modo apresentação o debug fica desligado.
+
 ## Estrutura
 
 ```
@@ -262,8 +305,12 @@ app/
   templates/      HTML (Jinja); base.html tem a sidebar e o cabeçalho
   static/         CSS, JavaScript e imagens (tudo local, funciona sem internet)
   static/vendor/  bibliotecas de terceiros (Chart.js)
+  data/           conteúdo do catálogo de códigos DTC (JSON)
+  security.py     proteções básicas (CSRF, cabeçalhos)
 tests/            testes pytest
+pacote/           iniciar.bat e LEIA-ME.txt do pacote portátil
 run.py            inicia o servidor local
+empacotar.py      gera dist/AutoScanPro.zip para levar a outro computador
 ```
 
 ## Documentos de especificação
@@ -295,5 +342,10 @@ run.py            inicia o servidor local
 
 ## Limitações
 
-- Sem conexão real com veículo (fora do escopo da versão 1.0).
+- Sem conexão real com veículo, ECU ou adaptador ELM327 (fora do escopo da versão 1.0).
 - Sem login: a aplicação é local e de uso único.
+- O simulador é **um só por servidor**: todas as abas abertas compartilham o mesmo estado, e ele volta ao normal quando o servidor reinicia.
+- Os limites dos sensores e das regras são didáticos, não especificações de um veículo.
+- O servidor é o de desenvolvimento do Flask, adequado para uso local, não para hospedagem pública.
+- O pacote portátil é só para Windows 64 bits com Python 3.11 a 3.14. No Linux, siga a instalação normal.
+- Testado no Chromium (navegador embutido) em tamanho de computador e de celular. Não foi testado no Firefox nem num celular de verdade.

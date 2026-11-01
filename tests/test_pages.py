@@ -58,12 +58,7 @@ def test_header_shows_active_vehicle(client, db_path):
     assert "Nenhum veículo ativo" not in html
 
 
-def test_pending_pages_have_no_action_buttons(client):
-    # Telas ainda não implementadas não podem exibir botões sem função.
+def test_every_page_is_implemented(client):
     for page in PAGES:
-        if page.get("template"):  # tela já implementada
-            continue
         html = client.get(page["path"]).get_data(as_text=True)
-        content = html.split('<main id="conteudo"', 1)[1].split("</main>", 1)[0]
-        assert "<button" not in content
-        assert f"Fase {page['phase']}" in content
+        assert "Módulo em desenvolvimento" not in html, page["path"]

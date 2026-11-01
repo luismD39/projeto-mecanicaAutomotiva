@@ -1,0 +1,48 @@
+AutoScan Pro - simulador didático de diagnóstico automotivo
+============================================================
+
+IMPORTANTE: é uma SIMULAÇÃO. O programa não se conecta a veículos reais.
+
+
+COMO USAR (Windows 10/11, 64 bits)
+----------------------------------
+
+1. Copie a pasta AutoScanPro inteira do pendrive para o computador
+   (por exemplo, para a Área de Trabalho). Não rode direto do pendrive:
+   na primeira vez o programa cria arquivos dentro da pasta.
+
+2. Dê dois cliques em  iniciar.bat
+
+   - Na primeira vez ele prepara tudo (menos de um minuto, SEM internet).
+   - O navegador abre sozinho no AutoScan Pro.
+   - Para encerrar, feche a janela preta.
+
+3. Se o navegador não abrir, digite o endereço que aparece na janela preta
+   (normalmente http://127.0.0.1:5000).
+
+
+SE APARECER "Não encontrei o Python"
+------------------------------------
+
+O computador precisa ter o Python 3.11, 3.12, 3.13 ou 3.14 (64 bits).
+Leve o instalador no pendrive (https://www.python.org/downloads/windows/)
+e, ao instalar:
+  - marque "Add python.exe to PATH";
+  - sem senha de administrador: desmarque "Use admin privileges when
+    installing py.exe" (assim instala só para o seu usuário).
+
+
+SE O WINDOWS BLOQUEAR O ARQUIVO
+-------------------------------
+
+Pode aparecer "O Windows protegeu o computador". Clique em
+"Mais informações" e depois em "Executar assim mesmo".
+
+
+DICAS PARA A APRESENTAÇÃO
+-------------------------
+
+- Teste o programa no computador da apresentação antes do dia, se possível.
+- Na tela Veículos, use "Carregar veículos de demonstração".
+- Roteiro sugerido: veja a seção "Laboratório de falhas" do README.md.
+- Leve um plano B: vídeo curto ou capturas de tela do programa funcionando.

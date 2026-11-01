@@ -1,0 +1,4 @@
+# Dependências do programa + as usadas somente nos testes
+-r requirements.txt
+pytest==9.2.0
+pypdf==6.21.4

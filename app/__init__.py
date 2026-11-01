@@ -10,6 +10,7 @@ from app.config import Config
 from app.errors import register_error_handlers
 from app.icons import icon
 from app.routes import catalog, health, pages, scanner, simulator, vehicles
+from app.security import register_security
 from app.services import fault_codes
 from app.services.simulator import EcuSimulator
 
@@ -32,6 +33,7 @@ def create_app(overrides: dict | None = None) -> Flask:
     app.extensions["ecu"] = EcuSimulator(seed=app.config.get("SIMULATOR_SEED"))
 
     register_error_handlers(app)
+    register_security(app)
     app.jinja_env.globals["icon"] = icon
     app.register_blueprint(health.bp)
     app.register_blueprint(pages.bp)

@@ -1,0 +1,2 @@
+# O cmd do Windows precisa de quebras de linha CRLF nos arquivos .bat
+*.bat text eol=crlf

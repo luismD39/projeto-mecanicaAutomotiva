@@ -140,10 +140,25 @@
     return td;
   }
 
+  async function loadDemo(e) {
+    const button = e.currentTarget; // depois do await, e.currentTarget já é null
+    button.disabled = true;
+    try {
+      const data = await AutoScan.api.post("/api/vehicles/demo");
+      AutoScan.notify(`${data.created} veículos de demonstração cadastrados. O primeiro já está ativo.`, "ok");
+      await loadList();
+    } catch (err) {
+      AutoScan.notify(err.message, "crit");
+      button.disabled = false;
+    }
+  }
+
   function renderList() {
     if (!vehicles.length) {
       AutoScan.showState(listBox, "empty", "Nenhum veículo cadastrado", {
-        detail: "Use o formulário para cadastrar o primeiro veículo fictício.",
+        detail: "Use o formulário para cadastrar um veículo fictício, ou carregue três veículos de demonstração.",
+        actionLabel: "Carregar veículos de demonstração",
+        onAction: loadDemo,
       });
       return;
     }

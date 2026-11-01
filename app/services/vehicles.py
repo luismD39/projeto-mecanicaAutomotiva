@@ -166,6 +166,21 @@ def activate_vehicle(db: sqlite3.Connection, vehicle_id: int) -> dict:
     return get_vehicle(db, vehicle_id)
 
 
+# Veículos fictícios para a demonstração (sem identificação real de nenhum veículo ou pessoa).
+DEMO_VEHICLES = [
+    {"make": "Volkswagen", "model": "Gol", "year": 2016, "engine": "1.0 MPI", "fuel_type": "flex", "mileage_km": 98000},
+    {"make": "Fiat", "model": "Argo", "year": 2021, "engine": "1.3 Firefly", "fuel_type": "flex", "mileage_km": 32000},
+    {"make": "Chevrolet", "model": "Onix", "year": 2019, "engine": "1.0 Turbo", "fuel_type": "flex", "mileage_km": 54500},
+]
+
+
+def create_demo_vehicles(db: sqlite3.Connection) -> list[dict]:
+    """Cadastra os veículos de demonstração que ainda não existem. Pode ser chamada de novo sem duplicar."""
+    existing = {(v["make"], v["model"], v["year"]) for v in list_vehicles(db)}
+    return [create_vehicle(db, data) for data in DEMO_VEHICLES
+            if (data["make"], data["model"], data["year"]) not in existing]
+
+
 def delete_vehicle(db: sqlite3.Connection, vehicle_id: int) -> None:
     """Política: veículo com diagnósticos no histórico não pode ser excluído (o histórico é preservado)."""
     vehicle = get_vehicle(db, vehicle_id)

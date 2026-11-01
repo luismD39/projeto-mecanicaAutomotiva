@@ -182,6 +182,16 @@ def test_vehicle_persists_after_restart(db_path):
     assert data["is_active"] is True
 
 
+def test_demo_vehicles_are_created_once(client):
+    resp = client.post("/api/vehicles/demo")
+    assert resp.status_code == 201
+    data = resp.get_json()
+    assert data["created"] == 3
+    assert sum(v["is_active"] for v in data["vehicles"]) == 1
+    assert client.post("/api/vehicles/demo").get_json()["created"] == 0  # não duplica
+    assert len(client.get("/api/vehicles").get_json()["vehicles"]) == 3
+
+
 def test_vehicles_page_has_form_and_fuel_options(client):
     html = client.get("/veiculos").get_data(as_text=True)
     assert 'id="vehicle-form"' in html
