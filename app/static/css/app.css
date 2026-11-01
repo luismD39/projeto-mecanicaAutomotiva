@@ -309,6 +309,13 @@ main:focus { outline: none; }
 .lab-effect { margin-top: 1rem; }
 .lab-effect .kpi-grid { margin-top: .75rem; }
 
+/* ---------- Histórico ---------- */
+
+.filters { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr)); align-items: end; }
+.filters-actions { align-self: end; padding-bottom: 1px; }
+.history-card { margin-top: 1rem; }
+.history-summary { display: block; margin-top: .3rem; white-space: normal; }
+
 /* ---------- Catálogo DTC ---------- */
 
 .code-list { list-style: none; margin: .75rem 0 0; padding: 0; display: grid; gap: .4rem; }

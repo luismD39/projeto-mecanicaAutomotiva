@@ -113,10 +113,15 @@ const DiagnosticView = (() => {
     const header = el("section", "card result-header");
     const top = el("div", "result-top");
     top.append(AutoScan.badge(d.status, d.status_label), el("h2", null, title));
+    const pdf = el("a", "btn btn--secondary", "Baixar relatório PDF");
+    pdf.href = `/api/reports/${d.diagnostic_id}/pdf`;
+    const actions = el("div", "form-actions quick-links");
+    actions.append(pdf);
     header.append(
       top,
       el("p", "result-summary", d.summary),
       el("p", "hint", `Diagnóstico nº ${d.diagnostic_id} · ${when} · ${d.vehicle.make} ${d.vehicle.model} ${d.vehicle.year} · ${d.notice}`),
+      actions,
     );
 
     const grid = el("div", "grid grid--2 result-grid");

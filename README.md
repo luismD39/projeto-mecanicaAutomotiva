@@ -16,7 +16,8 @@ Simulador didático de diagnóstico automotivo, feito como projeto acadêmico pa
 | 6. Catálogo DTC e Scanner | Concluída |
 | 7. Motor de regras e tela Diagnósticos | Concluída |
 | 8. Laboratório de falhas | Concluída |
-| 9 e 10 | Pendentes (ver `DEVELOPMENT_PLAN.md`) |
+| 9. Histórico e relatório PDF | Concluída |
+| 10. Qualidade e entrega | Pendente (ver `DEVELOPMENT_PLAN.md`) |
 
 As telas que ainda não foram implementadas abrem normalmente e informam em qual fase ganham funções. Elas não exibem botões sem ação.
 
@@ -47,6 +48,8 @@ Instale as dependências:
 ```bash
 pip install -r requirements.txt
 ```
+
+Dependências: Flask (servidor web) e ReportLab (relatório PDF). O pytest e o pypdf são usados somente pelos testes; o pypdf lê o texto dos PDFs gerados para conferir o conteúdo.
 
 > Se o PowerShell bloquear o `Activate.ps1`, rode uma vez `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned`, ou use os comandos sem ativar o ambiente: `.venv\Scripts\python run.py`.
 
@@ -208,6 +211,26 @@ O diagnóstico guarda uma cópia de tudo o que foi lido. Mudar o simulador, os l
 |---|---|---|
 | POST | `/api/scanner/start` | Faz a varredura e salva (201) |
 | GET | `/api/diagnostics/<id>` | Diagnóstico salvo: veículo, DTCs, condições e leituras |
+
+## Histórico e relatório PDF
+
+A tela **Histórico** lista os diagnósticos salvos, do mais recente para o mais antigo, com data e hora, veículo, quantidade de DTCs, situação e resumo. Os filtros são por veículo e por período (datas no horário do computador). Eles ficam no endereço da página, então dá para recarregar sem perdê-los. Cada linha tem **Abrir** (tela Diagnósticos) e **PDF**.
+
+O **relatório PDF** é gerado no servidor com ReportLab e baixado pelo navegador. Ele contém:
+- cabeçalho e rodapé com numeração de página;
+- o aviso destacado **"SIMULAÇÃO DIDÁTICA: não representa leitura de um veículo real"**;
+- identificação do diagnóstico e do veículo, data e hora, e resumo;
+- códigos com descrição;
+- condições observadas;
+- evidências, hipóteses e verificações de cada regra;
+- tabela de parâmetros com unidade e situação.
+
+O botão **Baixar relatório PDF** também aparece no resultado do Scanner e na tela Diagnósticos.
+
+| Método | Endereço | Ação |
+|---|---|---|
+| GET | `/api/diagnostics?vehicle_id=1&from=2026-11-01&to=2026-11-30` | Lista com filtros opcionais (422 se inválidos, 404 se o veículo não existir) |
+| GET | `/api/reports/<id>/pdf` | Baixa o PDF (404 se o diagnóstico não existir) |
 
 ## Erros
 

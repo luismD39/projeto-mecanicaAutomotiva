@@ -32,7 +32,7 @@ MISFIRE_CODES = {"P0300", "P0301"}
 
 # ---------- Auxiliares ----------
 
-def _fmt(value: float, unit: str) -> str:
+def format_value(value: float, unit: str) -> str:
     decimals = 0 if float(value).is_integer() else {"rpm": 0, "km/h": 0, "V": 2}.get(unit, 1)
     text = f"{value:,.{decimals}f}".replace(",", "X").replace(".", ",").replace("X", ".")
     return f"{text} {unit}"
@@ -51,7 +51,7 @@ class _Reading:
 
     def text(self, key) -> str:
         s = self.sensors[key]
-        return f"{s['label']}: {_fmt(s['value'], s['unit'])}"
+        return f"{s['label']}: {format_value(s['value'], s['unit'])}"
 
 
 def _finding(rule_id, title, level, evidence, hypotheses, checks, dtcs=()):
@@ -80,7 +80,7 @@ def rule_ect_high(r: _Reading):
     limit = limits["crit_high"] if level == "crit" else limits["warn_high"]
     return _finding(
         "R-ECT-ALTA", "Temperatura do motor elevada", level,
-        [f"{r.text('coolant_temperature')} (limite didático: {_fmt(limit, '°C')})"],
+        [f"{r.text('coolant_temperature')} (limite didático: {format_value(limit, '°C')})"],
         ["Nível baixo de líquido de arrefecimento ou vazamento",
          "Ventoinha não acionando",
          "Termostato travado fechado",
@@ -101,7 +101,7 @@ def rule_fan_not_on(r: _Reading):
     return _finding(
         "R-VENTOINHA", "Ventoinha desligada com temperatura alta", level,
         [r.text("coolant_temperature"), "Ventoinha: desligada",
-         f"Acima de {_fmt(RULE_LIMITS['fan_expected_on_c'], '°C')} a ventoinha já deveria estar ligada (limite didático)"],
+         f"Acima de {format_value(RULE_LIMITS['fan_expected_on_c'], '°C')} a ventoinha já deveria estar ligada (limite didático)"],
         ["Possível anomalia no comando ou no acionamento da ventoinha",
          "Relé ou fusível da ventoinha",
          "Motor elétrico da ventoinha",
@@ -145,7 +145,7 @@ def rule_voltage(r: _Reading):
         return _finding(
             "R-TENSAO-BAIXA", "Tensão de alimentação baixa com motor funcionando", level,
             [r.text("battery_voltage"), r.text("rpm"),
-             f"Com o motor funcionando, o sistema de carga costuma manter a tensão acima de {_fmt(t['warn_low'], 'V')} (limite didático)"],
+             f"Com o motor funcionando, o sistema de carga costuma manter a tensão acima de {format_value(t['warn_low'], 'V')} (limite didático)"],
             ["Alternador não está carregando",
              "Correia do alternador frouxa ou rompida",
              "Bateria em fim de vida",
@@ -159,7 +159,7 @@ def rule_voltage(r: _Reading):
         level = "crit" if volts >= t["crit_high"] else "warn"
         return _finding(
             "R-TENSAO-ALTA", "Tensão de alimentação alta", level,
-            [r.text("battery_voltage"), f"Limite didático de atenção: {_fmt(t['warn_high'], 'V')}"],
+            [r.text("battery_voltage"), f"Limite didático de atenção: {format_value(t['warn_high'], 'V')}"],
             ["Regulador de tensão do alternador com defeito"],
             ["Medir a tensão na bateria com o motor funcionando em diferentes rotações",
              "Testar o regulador de tensão do alternador"],
@@ -203,7 +203,7 @@ def rule_fuel_trim(r: _Reading):
         return None
 
     evidence = [r.text("short_term_fuel_trim"), r.text("long_term_fuel_trim"),
-                f"Soma das correções: {_fmt(total, '%')}"]
+                f"Soma das correções: {format_value(total, '%')}"]
     hypotheses = ["Entrada falsa de ar (mangueiras de vácuo, juntas do coletor, válvula PCV)",
                   "Pressão ou vazão de combustível baixa",
                   "Sensor MAF informando menos ar do que o motor admite"]

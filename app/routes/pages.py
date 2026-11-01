@@ -35,6 +35,7 @@ PAGES = [
      "phase": 8, "template": "lab.html",
      "summary": "Ative e desative cenários de falha para a demonstração."},
     {"endpoint": "historico", "path": "/historico", "title": "Histórico", "icon": "clock", "phase": 9,
+     "template": "history.html",
      "summary": "Liste e filtre diagnósticos anteriores e baixe relatórios em PDF."},
     {"endpoint": "codigos", "path": "/codigos-dtc", "title": "Códigos DTC", "icon": "book", "phase": 6,
      "template": "codes.html",
@@ -76,6 +77,8 @@ def _extra_context(endpoint: str) -> dict:
     if endpoint == "diagnosticos":
         # ?id=N abre um diagnóstico específico; sem id, o mais recente. O JS consulta a API e trata 404.
         return {"diagnostic_id": request.args.get("id", type=int) or diagnostics.get_latest_id(get_db())}
+    if endpoint == "historico":
+        return {"vehicles": vehicles.list_vehicles(get_db())}
     if endpoint == "laboratorio":
         return {"ecu_status": current_app.extensions["ecu"].status(), "sensors": simulator.SENSORS,
                 "scenario_names": {sid: s["name"] for sid, s in simulator.SCENARIOS.items()},

@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="card" aria-labelledby="titulo-filtros">
+  <h2 id="titulo-filtros">Filtros</h2>
+  <form id="filters" class="filters" novalidate>
+    <div class="field">
+      <label for="f-vehicle_id">Veículo</label>
+      <select id="f-vehicle_id" name="vehicle_id" aria-describedby="f-vehicle_id-error">
+        <option value="">Todos os veículos</option>
+        {% for v in vehicles %}
+        <option value="{{ v.id }}">{{ v.make }} {{ v.model }} {{ v.year }}</option>
+        {% endfor %}
+      </select>
+      <p class="field-error" id="f-vehicle_id-error" hidden></p>
+    </div>
+    <div class="field">
+      <label for="f-from">De</label>
+      <input id="f-from" name="from" type="date" aria-describedby="f-from-error">
+      <p class="field-error" id="f-from-error" hidden></p>
+    </div>
+    <div class="field">
+      <label for="f-to">Até</label>
+      <input id="f-to" name="to" type="date" aria-describedby="f-to-error">
+      <p class="field-error" id="f-to-error" hidden></p>
+    </div>
+    <div class="form-actions filters-actions">
+      <button type="submit" class="btn btn--primary">Filtrar</button>
+      <button type="button" class="btn btn--secondary" id="clear-filters">Limpar filtros</button>
+    </div>
+  </form>
+</section>
+
+<section class="card history-card" aria-labelledby="titulo-lista">
+  <h2 id="titulo-lista">Diagnósticos salvos</h2>
+  <p class="hint" id="history-count" aria-live="polite"></p>
+  <div id="history-list"></div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/history.js') }}"></script>
+{% endblock %}
